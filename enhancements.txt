@@ -1,0 +1,77 @@
+[2025-07-23] Landing Page & Dev Tools Update
+- Removed dropdown from Sign Up button; now a simple button linking to /signup
+- Updated feature cards for better contrast: rgba(0,0,0,0.4) background, #fff text
+- Disabled Next.js devIndicators (buildActivity) in next.config.ts
+[2025-07-23] Crew Dashboard and Booking Restructure
+- Moved conductor dashboard logic to /dashboard/conductor
+- Moved driver dashboard logic to /dashboard/driver
+- Moved booking features to /booking/page.tsx
+- Updated imports and navigation to reflect new structure
+[2025-07-23] Passenger Page Restructure
+- Moved booking page from /passenger/book to /booking
+- Moved passenger home page from /passenger/home to /dashboard/passenger
+- Moved SOS page from /passenger/sos to /sos
+- Updated navigation and all imports to use new routes: /booking, /dashboard/passenger, /sos
+[July 20, 2025] Booking page updated:
+- Trip details now use hardcoded options: Nairobi to Mombasa, Mombasa to Nairobi, Nairobi to Kisumu, Kisumu to Nairobi.
+- Time picker added; only valid future times can be selected.
+- Route selection and time validation logic updated to match spec.
+- After payment, user is redirected to digital receipt page with all details.
+- Feedback box closes on submit and shows 'add another feedback' button.
+MATGO SYSTEM ENHANCEMENTS LOG
+============================
+2025-07-21: Added src/app/api/login/route.ts to proxy login requests from frontend to backend API and database.
+2025-07-21: Fixed /api/login 404 by mounting authRoutes.js at /api in backend index.js.
+2025-07-21: Converted authRoutes.js, index.js, and controllers/authController.js to ES module syntax for compatibility with "type": "module".
+Date: July 16, 2025
+Project: MatGo Transportation System
+
+SIGNUP PROCESS ENHANCEMENTS
+--------------------------
+1. CrewSignupForm Component (/components/crew/CrewSignupForm.tsx):
+   - Added "use client" directive for Next.js client-side functionality
+   - Implemented Kenyan phone number validation
+   - Added comprehensive password validation
+   - Enhanced error handling with toast notifications
+   - Added loading states for better UX
+   - Improved form validation logic
+
+2. Main Signup Page (/app/signup/page.tsx):
+   - Added validation for Kenyan phone numbers
+   - Added comprehensive password strength validation (minimum 8 characters, uppercase, lowercase, number, special character)
+   - Implemented file size (max 5MB) and type validation for images and documents
+   - Enhanced error handling with descriptive toast notifications
+   - Improved server response handling with proper error messages
+   - Fixed form submission handler location and structure
+   - Added comprehensive form validation logic for all user roles
+   - Added file upload validation and preview functionality
+   - Improved UX with loading states and clear error messages
+   - Added proper cleanup of file inputs on validation failure
+   - Enhanced success messages with role-specific content
+   - Normalized phone numbers to international format
+
+3. Landing Page (/app/page.tsx):
+   - Removed Platform Stats section from landing page; will be shown only to System Admin on their dashboard
+
+[2025-07-23] Passenger Role Enhancements
+- Home Page:
+  - Greeter now displays only the user's first name (removed 'Passenger').
+  - Live trip status: Added Fleet Name/Number, Pickup, Drop-off fields. Live map now supports partial trips and appears after payment confirmation.
+  - Alert on approach: Passengers receive a text+sound notification when 100m/~5min from drop-off.
+  - Featured bus section: 3 horizontally-aligned cards, hover for Sacco/Driver/Conductor. Data fetched from admin promotions table via backend.
+- Book Page:
+  - Trip options for Nairobi↔Mombasa and Nairobi↔Kisumu. One-way and Two-way ticket types supported.
+  - Integrated with GET /api/routes, POST /api/bookings, POST /api/payments.
+- SOS Page:
+  - Emergency contacts: Add, call, SMS. Data saved per user. Integrated with GET/POST/DELETE emergency contacts endpoints.
+- Navigation:
+  - Navbar background is now semi-opaque: rgba(255,255,255,0.9) for light, rgba(18,18,18,0.85) for dark mode.
+- Backend:
+  - Added/updated tables: emergency_contacts, promotions, bookings.
+  - New/updated endpoints: GET /api/promotions/featured, GET /api/routes, POST /api/bookings, POST /api/payments, GET/POST/DELETE emergency contacts.
+- Performance: Prefetch featured buses and routes for low latency.
+- Notifications: WebSocket/Push API for drop-off alerts.
+- UI: Featured buses horizontally aligned on all devices.
+   - Removed Roadtrip Ideas section from landing page; will be shown on the dedicated Roadtrip page
+
+[Subsequent enhancements will be logged here as they are implemented...]

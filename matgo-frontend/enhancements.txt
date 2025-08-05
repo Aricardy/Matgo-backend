@@ -1,0 +1,13 @@
+# Enhancements Log
+
+## July 23, 2025
+- Added long-distance booking options for Nairobi–Mombasa, Mombasa–Nairobi, Nairobi–Kisumu, Kisumu–Nairobi, including round-trip and return date logic.
+- Integrated backend API for fetching long-distance routes and booking trips.
+- Added empty state for unavailable long-distance routes.
+- Added ticket type selection (One-way/Round-trip) and return date prompt.
+- Updated booking flow to POST to `/api/book-trip`.
+- Added action buttons to receipt page: Print, Download PDF, Share E-Ticket.
+- Fixed TypeScript syntax error in receipt page (extra closing brace).
+- Implemented mobile-friendly Share E-Ticket button using Web Share API with desktop fallback (copy link + toast).
+- PDF download and print actions use html2pdf.js and window.print() on receipt section.
+- To install: `npm install jspdf html2pdf.js` (for PDF export)

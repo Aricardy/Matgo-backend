@@ -1,0 +1,17 @@
+# REMOVED MOCK/SAMPLE DATA FROM FRONTEND
+
+Date: July 31, 2025
+
+## Files and Data Removed
+
+### /src/app/receipt/sample/page.tsx
+- Removed entire `fareData` object (hardcoded route/pricing/sample images).
+- Removed fallback sample data logic (using fareData and URL params for mock receipt info).
+- Receipt page now only uses backend data.
+
+## Next Steps
+- All other pages with mock/sample/static data will be cleaned and documented here as well.
+
+---
+
+If you need a full list for other files, let me know after review.

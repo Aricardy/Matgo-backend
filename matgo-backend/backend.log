@@ -1,0 +1,91 @@
+nohup: ignoring input
+[dotenv@17.2.0] injecting env (5) from .env (tip: ⚙️  enable debug logging with { debug: true })
+[dotenv@17.2.0] injecting env (0) from .env (tip: 🔐 encrypt with dotenvx: https://dotenvx.com)
+[dotenv@17.2.0] injecting env (0) from .env (tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' })
+✅ Server running at http://localhost:5000
+DB Sync error: ConnectionError [SequelizeConnectionError]: Access denied for user 'root'@'localhost'
+    at ConnectionManager.connect (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/sequelize/lib/dialects/mysql/connection-manager.js:102:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ConnectionManager._connect (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/sequelize/lib/dialects/abstract/connection-manager.js:222:24)
+    at async /home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/sequelize/lib/dialects/abstract/connection-manager.js:174:32 {
+  parent: Error: Access denied for user 'root'@'localhost'
+      at Packet.asError (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/packets/packet.js:740:17)
+      at ClientHandshake.execute (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/commands/command.js:29:26)
+      at Connection.handlePacket (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/base/connection.js:475:34)
+      at PacketParser.onPacket (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/base/connection.js:93:12)
+      at PacketParser.executeStart (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/packet_parser.js:75:16)
+      at Socket.<anonymous> (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/base/connection.js:100:25)
+      at Socket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5) {
+    code: 'ER_ACCESS_DENIED_NO_PASSWORD_ERROR',
+    errno: 1698,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'root'@'localhost'",
+    sql: undefined
+  },
+  original: Error: Access denied for user 'root'@'localhost'
+      at Packet.asError (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/packets/packet.js:740:17)
+      at ClientHandshake.execute (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/commands/command.js:29:26)
+      at Connection.handlePacket (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/base/connection.js:475:34)
+      at PacketParser.onPacket (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/base/connection.js:93:12)
+      at PacketParser.executeStart (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/packet_parser.js:75:16)
+      at Socket.<anonymous> (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/base/connection.js:100:25)
+      at Socket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5) {
+    code: 'ER_ACCESS_DENIED_NO_PASSWORD_ERROR',
+    errno: 1698,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'root'@'localhost'",
+    sql: undefined
+  }
+}
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+ConnectionError [SequelizeConnectionError]: Access denied for user 'root'@'localhost'
+    at ConnectionManager.connect (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/sequelize/lib/dialects/mysql/connection-manager.js:102:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ConnectionManager._connect (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/sequelize/lib/dialects/abstract/connection-manager.js:222:24)
+    at async /home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/sequelize/lib/dialects/abstract/connection-manager.js:174:32 {
+  parent: Error: Access denied for user 'root'@'localhost'
+      at Packet.asError (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/packets/packet.js:740:17)
+      at ClientHandshake.execute (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/commands/command.js:29:26)
+      at Connection.handlePacket (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/base/connection.js:475:34)
+      at PacketParser.onPacket (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/base/connection.js:93:12)
+      at PacketParser.executeStart (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/packet_parser.js:75:16)
+      at Socket.<anonymous> (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/base/connection.js:100:25)
+      at Socket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5) {
+    code: 'ER_ACCESS_DENIED_NO_PASSWORD_ERROR',
+    errno: 1698,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'root'@'localhost'",
+    sql: undefined
+  },
+  original: Error: Access denied for user 'root'@'localhost'
+      at Packet.asError (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/packets/packet.js:740:17)
+      at ClientHandshake.execute (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/commands/command.js:29:26)
+      at Connection.handlePacket (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/base/connection.js:475:34)
+      at PacketParser.onPacket (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/base/connection.js:93:12)
+      at PacketParser.executeStart (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/packet_parser.js:75:16)
+      at Socket.<anonymous> (/home/allan/Documents/IS_PROJECT/Matgo/matgo-backend/node_modules/mysql2/lib/base/connection.js:100:25)
+      at Socket.emit (node:events:507:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5) {
+    code: 'ER_ACCESS_DENIED_NO_PASSWORD_ERROR',
+    errno: 1698,
+    sqlState: '28000',
+    sqlMessage: "Access denied for user 'root'@'localhost'",
+    sql: undefined
+  }
+}
+
+Node.js v24.4.1

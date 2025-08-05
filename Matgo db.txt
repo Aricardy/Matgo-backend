@@ -1,0 +1,143 @@
+Matgo_db
+Tables Admins,Bookings,Drivers,Matatus,Passengers,SaccoAdmins,Trips(there's a table named Users I dont know its work but I do know it can confuse the system since all users table have been clearly stated)
+so I want to add buses ,drivers,conductors,system admin , 6 passengers ,4 sacco admins Mariadb(disguised as Mysql)
+__________
+here lets start with passengers 
+email: onanalaurine4@gmail.com name: Laurine Onana password: Onana@12345 dp:laurine.jpg
+email: ariamnyariana2@gmail.com name: Ariam Nyariana password:Ariam@12345 dp:Ariam.jpg
+email: allan.wachuka@strathmore.edu name: Allan Kimani password: Ariamkim@12345 dp:Allan.jpg
+email: alicewanjiru@gmail.com name: Alice Wanjiru password: Alice@12345 dp:Alice.jpg
+email: ariamkim1@gmail.com name: Ariam Kimani password: kimanikim@123 dp:Ariamkim.jpg
+email: kimkimani@gmail.com name: Kim Kimani password: Ariam@12345 dp:Kim.jpg
+all these accounts should all have dp ok 
+_________________________________________________________________________
+
+sacco admins 
+1.NTVRS 
+(route operation :Ngong and Rongai )
+email: ntvrs@sacco.co.ke
+passwords: NTVRS@12345
+name: Ntvrs Kajiado
+dp a must dp:NTVRS.png
+2.Supermetro 
+(route operation :Rongai and Ngong)
+email supermetro@sacco.co.ke
+password : Supermetro@12345
+name: Super Metro
+dp must dp:Super Metro.png
+3.Expresso
+(route operation : Kasarani,Ngong and Rongai) 
+email: expresso@sacco.co.ke
+password: Expresso@12345
+Name : Expresso Limited
+dp must dp:Expresso.png
+4.Embasava
+(route operation: Embakasi)
+email: embasava@sacco.co.ke
+password : Embasava@12345
+Name: Emba Pesa
+dp is a must dp:Embasava.png
+__________________________________________________________________
+
+For Buses, Driver and Conductors there are all connected
+_______________________________________________________________
+Ngong Route (One Eleven 111)NTVRS
+____________________________
+Bus                        Driver           Conductor
+X-Rated                    Ochila           Theo
+Phenomenal                 Dan              Deni
+CyberPunk                   Steven           Ivor
+Harukaze                   Brian            Matt
+Ikigai                     Otieno           Tman
+Mellows                    Dante            Ellie
+Stormzy                    Alex             Renee
+Monalisa                   Dave             Nachi
+Spice                      Benjamin         JVB
+Spurs                      Martin           Slim
+Explicit                   John             Maverick
+SCrilla                    Roy              Drakoo
+____________________________________________________________________
+Rongai Route (125)
+______(expresso)
+Baba Yaga                  Allan             Ben
+Moxie                      Jeff              Kim
+Ferari                     Moses             Mwari
+Detroit                    Andrew            Mwas
+
+____________________________________________________________________
+Kasarani Route (17b)(EXPRESSO)
+______________
+Gamer                      Dante              Davi
+Funka Delica               Kibe               Smith
+Malkia                     Abra               Hypr
+Jabari                     Kim                Capi
+__________________________________________________________________________
+Embakasi(embapesa)(embasava)
+__________________
+Brawlout                   Badder              Moses
+MoneyFest                  Ostoo               Qodo
+Heartless                  Huan                Gemmi
+Matrix                     Evans               Kilo
+Mood                       Lenny               Mkuu
+Genesis                    Dan                 Jade
+Restoration                Kelvin              Resto
+____________________________________________________________________________
+SuperMetro 
+Ngong 
+fleet 1456                 Evans                 John
+fleet 3743                 John                  Kelvin
+fleet 8643                 Maina                 Steve
+fleet 3737                 Charles               Ryan
+fleet 1234                 Nahbeel               Maina
+fleet 0001                 Kelvin                James
+
+Rongai
+fleet 19373                James                  Kelvin
+fleet 12349                Steve                  Charles 
+fleet 23456                Ryan                   John
+fleet 32456                Adri                   Maina
+fleet 78902                Soshi                  Evans
+__________________________________________________________________________________________________________________________________________________________
+Prices for each Route (Prices in KSh)
+Ngong                        
+NTVRS                                 Supermetro
+Ngong to Town (Agro House)            ngong to CBD Archives 
+                                    4am- 11am 100/=                        4am to 11pm 100/=                   11am -4pm  70/=
+11pm to 3:59pm no NTVRS bus is      4:01pm to 7:30 50/=
+on the way                          7:30pm to 11pm 100/=
+
+town to ngong 
+NTVRS                               supermetro
+through ngong road                  through ngong road
+4am to 8am 100/=                     4am to 12noon 100/=
+8am to 12noon 80/=                   12noon to 5pm 80/=
+1pm to 11pm 100/=                    5pm to 12midnight 100/=
+through southern bypass              southern bypass N/A 
+12noon to 8pm 150/=                  they do not use this 
+
+any road used for both saccos in ngong
+ngong to Karen 50/=
+town to karen 50/=
+ngong to Junction Mall 70/=
+town to junction mall 50/= (southern bypass doesn't apply here)
+
+southern bypass time all NTVRS buses pass through there ok 
+
+Rongai
+all is 100/=
+expresso 2pm to 6pm (southern bypass) 150/=
+rongai to karen and langata 50/=
+town to karen and langata  50 (southern bypass applies)
+
+Kasarani 
+all stages is 60/=
+
+Embakasi 
+100/= all stages 
+__________________________________________________________________________________________________________________________________
+Bus Pictures 
+all pictures have been named as the bus name/fleet number 
+all images are in :
+/Home/Music/Images/Bus (all bus images are .jpg)
+/Home/Music/Images/dp saccos (all sacco images are .png)
+/Home/Music/Images/dp users (all user images are .jpg)

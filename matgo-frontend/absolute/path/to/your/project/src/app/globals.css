@@ -1,0 +1,130 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Nganya Culture Inspired Theme - Updated */
+    --primary-hue: 195; /* #67dffa - Light Blue / Neon Blue */
+    --primary-saturation: 96%;
+    --primary-lightness: 70%; 
+    
+    --accent-hue: 0; /* #FF0000 - Bright Red */
+    --accent-saturation: 100%;
+    --accent-lightness: 50%;
+
+    --secondary-hue: 120; /* #80FF00 - Lime Green */
+    --secondary-saturation: 100%;
+    --secondary-lightness: 45%; /* Slightly darker for better contrast */
+
+    --highlight-hue: 60; /* #FFFF00 - Yellow */
+    --highlight-saturation: 100%;
+    --highlight-lightness: 50%; 
+    
+    --hot-purple-hue: 280; /* Hot Purple - keep for charts or specific accents */
+    --hot-purple-saturation: 80%;
+    --hot-purple-lightness: 60%;
+
+
+    /* Light Mode */
+    --background: 0 0% 100%; /* White */
+    --foreground: 240 10% 3.9%; /* Dark Gray for text */
+    --card: 0 0% 97%; /* Very light gray for cards */
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: var(--primary-hue) var(--primary-saturation) var(--primary-lightness);
+    --primary-foreground: 210 40% 98%; 
+    
+    --secondary: var(--secondary-hue) var(--secondary-saturation) var(--secondary-lightness);
+    --secondary-foreground: 240 10% 3.9%; 
+    
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    
+    --accent: var(--accent-hue) var(--accent-saturation) var(--accent-lightness);
+    --accent-foreground: 0 0% 100%; 
+
+    --destructive: 0 70% 50%; 
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: var(--primary-hue) var(--primary-saturation) calc(var(--primary-lightness) - 5%);
+
+    --radius: 0.75rem; 
+
+    --chart-1: var(--primary-hue) var(--primary-saturation) var(--primary-lightness);
+    --chart-2: var(--accent-hue) var(--accent-saturation) var(--accent-lightness);
+    --chart-3: var(--secondary-hue) var(--secondary-saturation) var(--secondary-lightness);
+    --chart-4: var(--highlight-hue) var(--highlight-saturation) var(--highlight-lightness);
+    --chart-5: var(--hot-purple-hue) var(--hot-purple-saturation) var(--hot-purple-lightness);
+  }
+
+  .dark {
+    /* Dark Mode - Dark Glassy Cards & Vibrant Accents */
+    --background: 240 6% 10%; 
+    --foreground: 0 0% 95%; 
+    
+    --card: 240 6% 12%; 
+    --card-foreground: 0 0% 95%;
+    
+    --popover: 240 6% 8%; 
+    --popover-foreground: 0 0% 95%;
+    
+    --primary: var(--primary-hue) var(--primary-saturation) var(--primary-lightness); 
+    --primary-foreground: 240 10% 3.9%; 
+    
+    --secondary: var(--secondary-hue) var(--secondary-saturation) var(--secondary-lightness); 
+    --secondary-foreground: 240 10% 3.9%; 
+    
+    --muted: 240 3.7% 15.9%; 
+    --muted-foreground: 0 0% 63.9%;
+    
+    --accent: var(--accent-hue) var(--accent-saturation) var(--accent-lightness); 
+    --accent-foreground: 0 0% 100%; 
+
+    --destructive: 0 65% 55%; 
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 240 3.7% 25%; 
+    --input: 240 3.7% 20%; 
+    --ring: var(--primary-hue) var(--primary-saturation) var(--primary-lightness);
+    
+    --chart-1: var(--primary-hue) var(--primary-saturation) calc(var(--primary-lightness) + 5%);
+    --chart-2: var(--accent-hue) var(--accent-saturation) calc(var(--accent-lightness) + 5%);
+    --chart-3: var(--secondary-hue) var(--secondary-saturation) calc(var(--secondary-lightness) + 5%);
+    --chart-4: var(--highlight-hue) var(--highlight-saturation) calc(var(--highlight-lightness) + 5%);
+    --chart-5: var(--hot-purple-hue) var(--hot-purple-saturation) calc(var(--hot-purple-lightness) + 5%);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .glassy-card {
+    @apply backdrop-blur-md border;
+  }
+  .light .glassy-card {
+    background-color: hsla(var(--card), 0.8);
+    border-color: hsla(var(--border), 0.5);
+  }
+  .dark .glassy-card {
+    background-color: hsla(var(--card-foreground), 0.05);
+    border-color: hsla(var(--border), 0.2);
+  }
+  .admin-sidebar {
+    @apply flex h-screen flex-col bg-card transition-all duration-300 ease-in-out;
+  }
+  .main-content {
+    @apply flex-1 overflow-y-auto transition-all duration-300 ease-in-out;
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "matgo-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Matgo transportation management system",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "seed": "node seeders/runSeeder.js",
+    "seed:passengers": "node seeders/seedDatabase.js",
+    "seed:drivers": "node seeders/seedDriversConductors.js",
+    "seed:pricing": "node seeders/seedPricing.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "matgo",
+    "transportation",
+    "matatu",
+    "booking",
+    "api"
+  ],
+  "author": "Matgo Team",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.6.5",
+    "path-to-regexp": "^6.3.0",
+    "sequelize": "^6.35.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
