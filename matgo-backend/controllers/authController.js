@@ -3,7 +3,12 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { generateToken, sanitizeUser } from '../utils/authUtils.js';
 
-export async function register(req, res) {
+/**
+ * Handle user signup
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ */
+export async function signupUser(req, res) {
   try {
     const { firstName, lastName, email, phone, password, role, sacco, busIdentifier, busType, saccoName } = req.body;
     const fullName = firstName && lastName ? `${firstName} ${lastName}` : req.body.fullName;
@@ -98,11 +103,14 @@ export async function register(req, res) {
   }
 }
 
-export async function login(req, res) {
+/**
+ * Handle user login
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ */
+export async function loginUser(req, res) {
   try {
-
     let { email, phone, password } = req.body;
-    console.log('Login attempt:', req.body);
 
     // Normalize input
     if (typeof email === 'string') email = email.trim();
@@ -159,13 +167,26 @@ export async function login(req, res) {
       });
     }
 
-    // Generate token using utility function
-    const token = generateToken(user);
+    // Generate token including approved flag
+    const token = jwt.sign(
+      { id: user.id, role: user.role, approved: !!user.approved },
+      process.env.JWT_SECRET || 'matgo_secret',
+      { expiresIn: '24h' }
+    );
 
     // Get sanitized user data
     const sanitizedUser = sanitizeUser(user);
 
-    // Send success response with token and user data
+    // Set httpOnly cookie for session (frontend should use credentials: 'include')
+    res.cookie(process.env.COOKIE_NAME || 'matgo_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 24 * 60 * 60 * 1000, // 24h
+    });
+
+    // Send success response with token and user data (token in body is optional)
     res.status(200).json({
       message: 'Login successful',
       token,
@@ -177,6 +198,24 @@ export async function login(req, res) {
       error: 'An error occurred during login',
       details: err.message || 'Unknown error'
     });
+  }
+}
+
+export async function getMe(req, res) {
+  try {
+    // prefer cookie, fallback to Authorization header
+    const cookieToken = req.cookies?.[process.env.COOKIE_NAME || 'matgo_token'];
+    const headerToken = req.headers.authorization?.split(' ')[1];
+    const token = cookieToken || headerToken;
+
+    if (!token) return res.status(401).json({ message: 'Not authenticated' });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'matgo_secret');
+
+    // return payload directly (do not include password)
+    return res.json({ user: decoded });
+  } catch (err) {
+    return res.status(401).json({ message: 'Invalid/expired token' });
   }
 }
 
@@ -231,6 +270,40 @@ export async function verifyToken(req, res) {
     res.status(401).json({
       error: 'Invalid token',
       details: err.message
+    });
+  }
+}
+
+/**
+ * Handle token refresh
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ */
+export async function refreshToken(req, res) {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(400).json({
+      error: 'Missing refresh token',
+    });
+  }
+
+  try {
+    // Verify the refresh token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || 'matgo_refresh_secret');
+
+    // Generate a new access token
+    const accessToken = jwt.sign(
+      { id: decoded.id, role: decoded.role },
+      process.env.JWT_SECRET || 'matgo_secret',
+      { expiresIn: '1h' }
+    );
+
+    res.json({ accessToken });
+  } catch (error) {
+    res.status(403).json({
+      error: 'Invalid refresh token',
+      message: error.message,
     });
   }
 }

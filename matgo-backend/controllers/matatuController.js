@@ -6,6 +6,7 @@ export const addMatatu = async (req, res) => {
   const matatu = await Matatu.create({ name, plateNumber, saccoId, routeId, image });
   res.json(matatu);
 };
+
 // Get featured matatus
 export const getFeaturedMatatus = async (req, res) => {
   try {
@@ -15,7 +16,6 @@ export const getFeaturedMatatus = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch featured matatus' });
   }
 };
-import Matatu from '../models/Matatu.js';
 
 export const getAll = async (req, res) => {
   const items = await Matatu.findAll();
@@ -23,8 +23,28 @@ export const getAll = async (req, res) => {
 };
 
 export const getOne = async (req, res) => {
-  const item = await Matatu.findByPk(req.params.id);
-  item ? res.json(item) : res.status(404).json({ error: 'Matatu not found' });
+  try {
+    const searchValue = req.params.id;
+    
+    // Try to find by ID first
+    let item = await Matatu.findByPk(searchValue);
+    
+    // If not found by ID, try to find by identifier
+    if (!item) {
+      item = await Matatu.findOne({
+        where: { identifier: searchValue }
+      });
+    }
+
+    if (!item) {
+      return res.status(404).json({ error: 'Matatu not found' });
+    }
+
+    res.json(item);
+  } catch (err) {
+    console.error('Error fetching matatu:', err);
+    res.status(500).json({ error: 'Server error while fetching matatu' });
+  }
 };
 
 export const create = async (req, res) => {

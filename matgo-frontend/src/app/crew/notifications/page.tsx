@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bell, AlertTriangle, Info, CheckCircle, Trash2, MarkAsUnread } from "lucide-react";
+import { Bell, AlertTriangle, Info, CheckCircle, Trash2 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
@@ -301,7 +301,6 @@ export default function CrewNotificationsPage() {
                         onClick={() => markAsUnread(notification.id)}
                         className="text-xs h-8"
                       >
-                        <MarkAsUnread className="h-3 w-3 mr-1" />
                         {currentText.markAsUnread}
                       </Button>
                     ) : (

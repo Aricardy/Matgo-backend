@@ -1,4 +1,3 @@
-
 "use client";
 
 import AppLayout from "@/components/layout/AppLayout";
@@ -30,153 +29,119 @@ interface ScannedBusDetails {
 
 const QR_READER_ELEMENT_ID = "qr-reader-element";
 
+// Content translations
+const getContent = (language: string) => ({
+  busNotFoundTitle: language === 'KSW' ? 'Basi Halikupatikana' : 'Bus Not Found',
+  howItWorksTitle: language === 'KSW' ? 'Jinsi ya Kutumia' : 'How It Works',
+  howItWorksSteps: language === 'KSW' ? [
+    "Elekeza kamera yako kwenye msimbo wa QR, hakikisha ina mwanga wa kutosha na iko katikati.",
+    "Baada ya kuskaniwa, hakiki maelezo ya basi, njia, na taarifa ya nauli inayoonyeshwa kwenye skrini yako.",
+    "Chagua njia yako ya malipo (M-Pesa au Airtel Money).",
+    "Weka nambari yako ya simu na gusa \"Endelea Kulipa\".",
+    "Risiti/tikiti yako ya kielektroniki itatolewa papo hapo baada ya malipo kufaulu. Onyesha kwa kondakta ikiombwa."
+  ] : [
+    "Point your camera at the QR code, ensure good lighting and center alignment.",
+    "After scanning, verify the bus details, route, and fare information displayed on your screen.",
+    "Choose your payment method (M-Pesa or Airtel Money).",
+    "Enter your phone number and tap \"Proceed to Pay\".",
+    "Your e-receipt/ticket will be generated immediately after successful payment. Show it to the conductor when requested."
+  ],
+  enterBusNumberTitle: language === 'KSW' ? 'Weka Maelezo ya Basi' : 'Enter Bus Details',
+  enterBusNumberPlaceholder: language === 'KSW' ? 'k.m., KDA 123X au Monalisa' : 'e.g., KDA 123X or Monalisa',
+  searchButton: language === 'KSW' ? 'Tafuta' : 'Search',
+  scanQrButton: language === 'KSW' ? 'Skani Msimbo wa QR' : 'Scan QR Code',
+  enterManuallyButton: language === 'KSW' ? 'Ingiza Namba ya Basi' : 'Enter Bus Number',
+  backButton: language === 'KSW' ? 'Rudi' : 'Back',
+  vehicleDetails: (name: string, type: string) => language === 'KSW' ? 
+    `${type}: ${name}` : 
+    `${type}: ${name}`,
+  fareLabel: language === 'KSW' ? 'Nauli:' : 'Fare:',
+  payWithMpesa: language === 'KSW' ? 'Lipa na M-Pesa' : 'Pay with M-Pesa',
+  payWithAirtel: language === 'KSW' ? 'Lipa na Airtel Money' : 'Pay with Airtel Money',
+  payWithCash: language === 'KSW' ? 'Lipa kwa Pesa Taslimu' : 'Pay with Cash',
+  seatCountLabel: language === 'KSW' ? 'Idadi ya Viti:' : 'Number of Seats:',
+  enterPhoneNumber: language === 'KSW' ? 'Weka Nambari yako ya Simu' : 'Enter your Phone Number',
+  proceedToPay: language === 'KSW' ? 'Endelea Kulipa' : 'Proceed to Pay',
+  changePaymentMethod: language === 'KSW' ? 'Badilisha Njia' : 'Change Method',
+  paymentInitiatedTitle: language === 'KSW' ? 'Malipo Yameanzishwa' : 'Payment Initiated',
+  paymentInitiatedDesc: (method: string, fare: string, phone: string) => 
+    language === 'KSW' 
+      ? `Malipo ya ${method} ya Ksh ${fare} kwenda ${phone} yameanzishwa. Angalia simu yako.`
+      : `${method} payment of Ksh ${fare} to ${phone} initiated. Check your phone.`,
+  invalidPhoneTitle: language === 'KSW' ? 'Nambari ya Simu Si Sahihi' : 'Invalid Phone Number',
+  invalidPhoneDesc: language === 'KSW' 
+    ? 'Tafadhali weka nambari sahihi ya simu ya Kenya (ianze na 07 au 01)' 
+    : 'Please enter a valid Kenyan phone number (starting with 07 or 01)',
+  scanSuccessfulTitle: language === 'KSW' ? 'Skani Imefaulu!' : 'Scan Successful!',
+  scanSuccessfulDesc: language === 'KSW' 
+    ? 'Maelezo ya basi yamepatikana. Tafadhali hakiki na uchague njia ya malipo.'
+    : 'Bus details retrieved. Please verify and choose payment method.',
+
+  // --- Added missing keys for error handling and UI ---
+  cameraErrorTitle: language === 'KSW' ? 'Hitilafu ya Kamera' : 'Camera Error',
+  cameraErrorDesc: language === 'KSW' ? 'Kamera haikuweza kuanzishwa. Tafadhali hakikisha ruhusa imetolewa na ujaribu tena.' : 'Camera could not be started. Please ensure permission is granted and try again.',
+  noCameraTitle: language === 'KSW' ? 'Hakuna Kamera Iliyopatikana' : 'No Camera Found',
+  noCameraDesc: language === 'KSW' ? 'Hakuna kamera iliyopatikana kwenye kifaa hiki.' : 'No camera was found on this device.',
+  cameraAccessFailedTitle: language === 'KSW' ? 'Imeshindikana Kufikia Kamera' : 'Camera Access Failed',
+  cameraAccessFailedDesc: language === 'KSW' ? 'Imeshindikana kufikia kamera. Tafadhali hakikisha ruhusa imetolewa.' : 'Failed to access camera. Please ensure permission is granted.',
+  nganyaFoundToast: language === 'KSW' ? 'Basi Limepatikana!' : 'Bus Found!',
+  nganyaFoundToastDesc: language === 'KSW' ? 'Maelezo ya basi yamepatikana kutoka kwa QR.' : 'Bus details retrieved from QR.',
+  invalidQrTitle: language === 'KSW' ? 'QR Si Sahihi' : 'Invalid QR',
+  invalidQrDesc: language === 'KSW' ? 'Msimbo wa QR haukueleweka. Tafadhali jaribu tena.' : 'The QR code could not be understood. Please try again.',
+  notMatGoQrTitle: language === 'KSW' ? 'QR Sio ya MatGo' : 'Not a MatGo QR',
+  notMatGoQrDesc: language === 'KSW' ? 'Msimbo huu wa QR sio wa MatGo.' : 'This QR code is not a MatGo code.',
+  busDetailsFound: language === 'KSW' ? 'Maelezo ya Basi Yamepatikana' : 'Bus Details Found',
+  busNotFoundDesc: language === 'KSW' ? 'Basi halikupatikana. Tafadhali hakikisha nambari au jina ni sahihi.' : 'Bus not found. Please ensure the number or name is correct.',
+  // UI button/label keys used in the UI
+  enterBusOption: language === 'KSW' ? 'Ingiza Nambari ya Basi' : 'Enter Bus Number',
+  scanQrOption: language === 'KSW' ? 'Skani QR' : 'Scan QR',
+  findBusButton: language === 'KSW' ? 'Tafuta Basi' : 'Find Bus',
+  routeLabel: language === 'KSW' ? 'Njia:' : 'Route:',
+  saccoLabel: language === 'KSW' ? 'Sacco:' : 'Sacco:',
+  pageTitle: language === 'KSW' ? 'Lipa Nauli' : 'Pay Fare',
+  pageDescription: language === 'KSW' ? 'Lipa nauli yako kwa urahisi kwa kutumia QR au nambari ya basi.' : 'Easily pay your fare using QR or bus number.',
+  alignQrHelpText: language === 'KSW' ? 'Lenga QR katikati ya fremu' : 'Align QR in the center of the frame',
+  cancelScan: language === 'KSW' ? 'Ghairi' : 'Cancel',
+  cameraAccessProblemTitle: language === 'KSW' ? 'Tatizo la Kamera' : 'Camera Problem',
+  cameraAccessProblemDesc: language === 'KSW' ? 'Kamera haipatikani au haijaruhusiwa.' : 'Camera is unavailable or not permitted.',
+  invalidQrScannedTitle: language === 'KSW' ? 'QR Si Sahihi' : 'Invalid QR',
+  invalidQrScannedDesc: language === 'KSW' ? 'Msimbo wa QR haukueleweka. Tafadhali jaribu tena.' : 'The QR code could not be understood. Please try again.',
+  scanAgainButton: language === 'KSW' ? 'Jaribu Tena' : 'Scan Again',
+  // ...add more as needed
+});
+
 export default function ScanPage() {
+  // Hooks
+  const router = useRouter();
+  const { toast } = useToast();
+  const { language } = useLanguage();
+  
+  // State for scanning modes
   const [mode, setMode] = useState<"options" | "enterBusNumber" | "scanQr">("options");
   const [busNumberInput, setBusNumberInput] = useState<string>("");
   const [foundBusDetails, setFoundBusDetails] = useState<ScannedBusDetails | null>(null);
   const [manualEntryError, setManualEntryError] = useState<string | null>(null);
 
+  // State for QR scanning
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [scannedData, setScannedData] = useState<string | null>(null);
   const [qrScannedBusDetails, setQrScannedBusDetails] = useState<ScannedBusDetails | null>(null);
   const [isScanning, setIsScanning] = useState(false);
+
+  // State for payment
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"mpesa" | "airtel" | "cash" | null>(null);
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [seatCount, setSeatCount] = useState<number>(1);
   
+  // Refs
   const html5QrCodeInstanceRef = useRef<Html5Qrcode | null>(null);
   const readerContainerRendered = useRef(false);
-  const { toast } = useToast();
-  const { language } = useLanguage();
-  const router = useRouter(); // Initialize router
 
-  const currentBusToPay = mode === 'enterBusNumber' ? foundBusDetails : qrScannedBusDetails;
-
-  const content = {
-    ENG: {
-      pageTitle: "Pay Your Fare",
-      pageDescription: "Choose how you want to identify your bus and pay your fare quickly with MatGo!",
-      enterBusOption: "Enter Bus Number to Pay",
-      scanQrOption: "Scan QR to Pay",
-      startScanning: "Start Scanning",
-      cancelScan: "Cancel Scan",
-      alignQrHelpText: "Align QR code within frame",
-      cameraErrorTitle: "Camera Error",
-      cameraErrorDesc: "Could not start camera. Please check permissions or try another browser.",
-      noCameraTitle: "No Camera Found",
-      noCameraDesc: "No camera detected on this device.",
-      cameraAccessFailedTitle: "Camera Access Failed",
-      cameraAccessFailedDesc: "Could not access camera list.",
-      nganyaFoundToast: "Nganya Found!",
-      nganyaFoundToastDesc: "Bus details retrieved. Ready to roll!",
-      invalidQrTitle: "Invalid MatGo QR",
-      invalidQrDesc: "QR code format is incorrect.",
-      notMatGoQrTitle: "Not a MatGo QR",
-      notMatGoQrDesc: "This QR code is not recognized by MatGo.",
-      cameraAccessProblemTitle: "Camera Access Problem",
-      cameraAccessProblemDesc: "Camera access was denied or no camera was found. Please check your browser/OS permissions and try again.",
-      scanSuccessfulTitle: "Scan Successful!",
-      scanSuccessfulDesc: "Details for the scanned Matatu:",
-      vehicleDetails: (nameOrId: string, type: string) => `${nameOrId} (${type})`,
-      routeLabel: "Route:",
-      saccoLabel: "SACCO:",
-      fareLabel: "Fare:",
-      payWithMpesa: "Pay with M-Pesa",
-      payWithAirtel: "Pay with Airtel Money",
-      payWithCash: "Pay with Cash",
-      seatCountLabel: "Number of Seats:",
-      enterPhoneNumber: "Enter your Phone Number",
-      proceedToPay: "Proceed to Pay",
-      changePaymentMethod: "Change Method",
-      paymentInitiatedTitle: "Payment Initiated",
-      paymentInitiatedDesc: (method: string, fare: string, phone: string) => `${method} payment for Ksh ${fare} to ${phone} initiated. Check your phone.`,
-      invalidPhoneTitle: "Invalid Phone Number",
-      invalidPhoneDesc: "Please enter a valid phone number.",
-      scanAgainButton: "Scan Again",
-      invalidQrScannedTitle: "Invalid QR Code Scanned",
-      invalidQrScannedDesc: "The scanned QR code is not a valid MatGo bus identifier. Please try again with an official MatGo QR code found on the bus.",
-      howItWorksTitle: "How MatGo QR Scan Works",
-      howItWorksSteps: [
-        "Locate the MatGo QR code sticker inside or outside the bus/matatu.",
-        "Tap \"Start Scanning\" and allow camera access if prompted.",
-        "Point your camera at the QR code, ensuring it's well-lit and centered.",
-        "Once scanned, verify bus details, route, and fare information shown on your screen.",
-        "Choose your payment method (M-Pesa or Airtel Money).",
-        "Enter your phone number and tap \"Proceed to Pay\".",
-        "Your digital receipt/e-ticket will be generated instantly after successful payment. Show it to the conductor if requested."
-      ],
-      enterBusNumberTitle: "Enter Bus Details",
-      enterBusNumberPlaceholder: "e.g., KDA 123X or Monalisa",
-      findBusButton: "Find Bus",
-      busNotFoundTitle: "Bus Not Found",
-      busNotFoundDesc: "The bus identifier entered was not found in our system. Please check and try again, or scan the QR code.",
-      tryAgainButton: "Try Again",
-      backButton: "Back to Options",
-      busDetailsFound: "Bus Details Found!",
-    },
-    KSW: {
-      pageTitle: "Lipa Nauli Yako",
-      pageDescription: "Chagua jinsi unavyotaka kutambua basi lako na ulipe nauli yako haraka na MatGo!",
-      enterBusOption: "Weka Nambari ya Basi Kulipa",
-      scanQrOption: "Skani QR Kulipa",
-      startScanning: "Anza Kuskani",
-      cancelScan: "Ghairi Kuskani",
-      alignQrHelpText: "Panga msimbo wa QR ndani ya fremu",
-      cameraErrorTitle: "Tatizo la Kamera",
-      cameraErrorDesc: "Imeshindwa kuanzisha kamera. Tafadhali angalia ruhusa au jaribu kivinjari kingine.",
-      noCameraTitle: "Hakuna Kamera Iliyopatikana",
-      noCameraDesc: "Hakuna kamera iliyogunduliwa kwenye kifaa hiki.",
-      cameraAccessFailedTitle: "Ufikiaji wa Kamera Umeshindwa",
-      cameraAccessFailedDesc: "Imeshindwa kupata orodha ya kamera.",
-      nganyaFoundToast: "Nganya Imepatikana!",
-      nganyaFoundToastDesc: "Maelezo ya basi yamepatikana. Tayari kwa safari!",
-      invalidQrTitle: "QR ya MatGo Si Sahihi",
-      invalidQrDesc: "Muundo wa msimbo wa QR si sahihi.",
-      notMatGoQrTitle: "Si QR ya MatGo",
-      notMatGoQrDesc: "Msimbo huu wa QR hautambuliwi na MatGo.",
-      cameraAccessProblemTitle: "Tatizo la Ufikiaji wa Kamera",
-      cameraAccessProblemDesc: "Ufikiaji wa kamera ulikataliwa au hakuna kamera iliyopatikana. Tafadhali angalia ruhusa za kivinjari/OS yako na ujaribu tena.",
-      scanSuccessfulTitle: "Uskani Umefaulu!",
-      scanSuccessfulDesc: "Maelezo ya Matatu iliyoskaniwa:",
-      vehicleDetails: (nameOrId: string, type: string) => `${nameOrId} (${type})`,
-      routeLabel: "Njia:",
-      saccoLabel: "SACCO:",
-      fareLabel: "Nauli:",
-      payWithMpesa: "Lipa na M-Pesa",
-      payWithAirtel: "Lipa na Airtel Money",
-      payWithCash: "Lipa kwa Pesa Taslimu",
-      seatCountLabel: "Idadi ya Viti:",
-      enterPhoneNumber: "Weka Nambari yako ya Simu",
-      proceedToPay: "Endelea Kulipa",
-      changePaymentMethod: "Badilisha Njia",
-      paymentInitiatedTitle: "Malipo Yameanzishwa (Mfumo)",
-      paymentInitiatedDesc: (method: string, fare: string, phone: string) => `Malipo ya ${method} ya Ksh ${fare} kwenda ${phone} yameanzishwa. Angalia simu yako.`,
-      invalidPhoneTitle: "Nambari ya Simu Si Sahihi",
-      invalidPhoneDesc: "Tafadhali weka nambari sahihi ya simu.",
-      scanAgainButton: "Skani Tena",
-      invalidQrScannedTitle: "Msimbo wa QR Ulioskaniwa Si Sahihi",
-      invalidQrScannedDesc: "Msimbo wa QR ulioskaniwa si kitambulisho halali cha basi la MatGo. Tafadhali jaribu tena na msimbo rasmi wa QR wa MatGo unaopatikana kwenye basi.",
-      howItWorksTitle: "Jinsi Skani ya QR ya MatGo Inavyofanya Kazi",
-      howItWorksSteps: [
-        "Tafuta kibandiko cha msimbo wa QR wa MatGo ndani au nje ya basi/matatu.",
-        "Gusa \"Anza Kuskani\" na uruhusu ufikiaji wa kamera ukiombwa.",
-        "Elekeza kamera yako kwenye msimbo wa QR, hakikisha ina mwanga wa kutosha na iko katikati.",
-        "Baada ya kuskaniwa, hakiki maelezo ya basi, njia, na taarifa ya nauli inayoonyeshwa kwenye skrini yako.",
-        "Chagua njia yako ya malipo (M-Pesa au Airtel Money).",
-        "Weka nambari yako ya simu na gusa \"Endelea Kulipa\".",
-        "Risiti/tikiti yako ya kielektroniki itatolewa papo hapo baada ya malipo kufaulu. Onyesha kwa kondakta ikiombwa."
-      ],
-      enterBusNumberTitle: "Weka Maelezo ya Basi",
-      enterBusNumberPlaceholder: "k.m., KDA 123X au Monalisa",
-      findBusButton: "Tafuta Basi",
-      busNotFoundTitle: "Basi Halikupatikana",
-      busNotFoundDesc: "Kitambulisho cha basi ulichoweka hakikupatikana kwenye mfumo wetu. Tafadhali angalia na ujaribu tena, au skani msimbo wa QR.",
-      tryAgainButton: "Jaribu Tena",
-      backButton: "Rudi kwa Chaguo",
-      busDetailsFound: "Maelezo ya Basi Yamepatikana!",
-    }
-  };
-  const currentContent = content[language];
+  // Current bus to pay for
+  const currentBusToPay = foundBusDetails || qrScannedBusDetails;
+  
+  // Get translations based on current language
+  const currentContent = getContent(language);
 
   const cleanupScanner = () => {
     if (html5QrCodeInstanceRef.current) {
@@ -194,306 +159,323 @@ export default function ScanPage() {
     }
   };
 
-  useEffect(() => {
-    if (mode === 'scanQr' && isScanning && readerContainerRendered.current) {
-      cleanupScanner(); 
+    React.useEffect(() => {
+      if (mode === 'scanQr' && isScanning && readerContainerRendered.current) {
+        cleanupScanner(); 
 
-      const newScannerInstance = new Html5Qrcode(QR_READER_ELEMENT_ID, {
-        formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
-        verbose: false,
-      });
-      html5QrCodeInstanceRef.current = newScannerInstance;
+        const newScannerInstance = new Html5Qrcode(QR_READER_ELEMENT_ID, {
+          formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+          verbose: false,
+        });
+        html5QrCodeInstanceRef.current = newScannerInstance;
 
-      Html5Qrcode.getCameras()
-        .then((cameras) => {
-          if (cameras && cameras.length) {
-            setHasCameraPermission(true);
-            newScannerInstance.start(
-              { facingMode: "environment" },
-              { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
-              (decodedText: string) => handleScanSuccess(decodedText),
-              (errorMessage: string) => { /* console.log("QR Error:", errorMessage) */ }
-            ).catch(err => {
-              console.error("Error starting QR scanner:", err);
+        Html5Qrcode.getCameras()
+          .then((cameras) => {
+            if (cameras && cameras.length) {
+              setHasCameraPermission(true);
+              newScannerInstance.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
+                (decodedText: string) => handleScanSuccess(decodedText),
+                (errorMessage: string) => { /* console.log("QR Error:", errorMessage) */ }
+              ).catch(err => {
+                console.error("Error starting QR scanner:", err);
+                setHasCameraPermission(false);
+                setIsScanning(false);
+                setMode("options"); 
+                toast({ variant: "destructive", title: currentContent.cameraErrorTitle, description: currentContent.cameraErrorDesc });
+              });
+            } else {
               setHasCameraPermission(false);
               setIsScanning(false);
-              setMode("options"); 
-              toast({ variant: "destructive", title: currentContent.cameraErrorTitle, description: currentContent.cameraErrorDesc });
-            });
-          } else {
+              setMode("options");
+              toast({ variant: "destructive", title: currentContent.noCameraTitle, description: currentContent.noCameraDesc });
+            }
+          })
+          .catch(err => {
+            console.error("Error getting cameras:", err);
             setHasCameraPermission(false);
             setIsScanning(false);
             setMode("options");
-            toast({ variant: "destructive", title: currentContent.noCameraTitle, description: currentContent.noCameraDesc });
-          }
-        })
-        .catch(err => {
-          console.error("Error getting cameras:", err);
-          setHasCameraPermission(false);
-          setIsScanning(false);
-          setMode("options");
-          toast({ variant: "destructive", title: currentContent.cameraAccessFailedTitle, description: currentContent.cameraAccessFailedDesc });
-        });
-    }
-    return () => {
-      if (!isScanning && html5QrCodeInstanceRef.current) {
-         cleanupScanner();
+            toast({ variant: "destructive", title: currentContent.cameraAccessFailedTitle, description: currentContent.cameraAccessFailedDesc });
+          });
       }
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isScanning, mode, toast, currentContent]);
+      return () => {
+        if (!isScanning && html5QrCodeInstanceRef.current) {
+           cleanupScanner();
+        }
+      };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isScanning, mode, toast, currentContent]);
   
-  useEffect(() => {
-    if (mode === 'scanQr' && isScanning) {
-        readerContainerRendered.current = true;
-    } else {
-        readerContainerRendered.current = false;
-    }
-  }, [isScanning, mode]);
+    React.useEffect(() => {
+      if (mode === 'scanQr' && isScanning) {
+          readerContainerRendered.current = true;
+      } else {
+          readerContainerRendered.current = false;
+      }
+    }, [isScanning, mode]);
 
+    const triggerStartScanning = () => {
+      setScannedData(null);
+      setQrScannedBusDetails(null);
+      setHasCameraPermission(null);
+      setSelectedPaymentMethod(null);
+      setPhoneNumber("");
+      setSeatCount(1);
+      setIsScanning(true);
+      setMode('scanQr');
+    };
 
-  const triggerStartScanning = () => {
-    setScannedData(null);
-    setQrScannedBusDetails(null);
-    setHasCameraPermission(null);
-    setSelectedPaymentMethod(null);
-    setPhoneNumber("");
-    setSeatCount(1);
-    setIsScanning(true);
-    setMode('scanQr');
-  };
+    const triggerStopScanning = () => {
+      setIsScanning(false);
+      cleanupScanner();
+      setMode('options');
+    };
 
-  const triggerStopScanning = () => {
-    setIsScanning(false);
-    cleanupScanner();
-    setMode('options');
-  };
-
-  const handleScanSuccess = (data: string) => {
-    setIsScanning(false); 
-    cleanupScanner();
-    setScannedData(data);
+    const handleScanSuccess = (data: string) => {
+      setIsScanning(false); 
+      cleanupScanner();
+      setScannedData(data);
     
-    if (data.startsWith("MATGO_BUS::")) {
-      const parts = data.substring(12).split("_");
-      if (parts.length >= 6) {
-        setQrScannedBusDetails({
-          id: parts[0],
-          name: parts[1] === "N/A" ? undefined : parts[1].replace(/-/g, " "),
-          route: parts[2].replace(/-/g, " "),
-          fare: parts[3],
-          sacco: parts[4].replace(/-/g, " "),
-          type: parts[5] as ScannedBusDetails["type"] || "Bus",
-          image: `https://placehold.co/600x200.png?text=${parts[0]}`, // Sample image
-          imageHint: `${parts[5]} bus`,
-        });
-        toast({ title: currentContent.nganyaFoundToast, description: currentContent.nganyaFoundToastDesc, className: "bg-primary text-primary-foreground" });
+      if (data.startsWith("MATGO_BUS::")) {
+        const parts = data.substring(12).split("_");
+        if (parts.length >= 6) {
+          setQrScannedBusDetails({
+            id: parts[0],
+            name: parts[1] === "N/A" ? undefined : parts[1].replace(/-/g, " "),
+            route: parts[2].replace(/-/g, " "),
+            fare: parts[3],
+            sacco: parts[4].replace(/-/g, " "),
+            type: parts[5] as ScannedBusDetails["type"] || "Bus",
+            image: `https://placehold.co/600x200.png?text=${parts[0]}`,
+            imageHint: `${parts[5]} bus`,
+          });
+          toast({ title: currentContent.nganyaFoundToast, description: currentContent.nganyaFoundToastDesc, className: "bg-primary text-primary-foreground" });
+        } else {
+          setQrScannedBusDetails(null);
+          toast({ variant: "destructive", title: currentContent.invalidQrTitle, description: currentContent.invalidQrDesc });
+        }
       } else {
         setQrScannedBusDetails(null);
-        toast({ variant: "destructive", title: currentContent.invalidQrTitle, description: currentContent.invalidQrDesc });
+        toast({ variant: "destructive", title: currentContent.notMatGoQrTitle, description: currentContent.notMatGoQrDesc });
       }
-    } else {
-      setQrScannedBusDetails(null);
-      toast({ variant: "destructive", title: currentContent.notMatGoQrTitle, description: currentContent.notMatGoQrDesc });
-    }
-  };
+    };
 
-  const handleFindBus = async () => {
-    setManualEntryError(null);
-    const busIdToFind = busNumberInput.trim().toUpperCase();
-    const token = localStorage.getItem('matgoToken');
+    const handleFindBus = async () => {
+      setManualEntryError(null);
+  const busIdToFind = encodeURIComponent(busNumberInput.trim());
+      const token = localStorage.getItem('matgoToken');
     
-    try {
-      // Try to fetch bus details from backend
-      const response = await fetch(`http://localhost:5000/api/vehicles/${busIdToFind}`, {
-        headers: {
-          'Authorization': token ? `Bearer ${token}` : ''
-        }
-      });
-      
-      if (response.ok) {
-        const busData = await response.json();
-        const busDetails: ScannedBusDetails = {
-          id: busData.plateNumber || busData.id,
-          name: busData.name || busData.vehicleName,
-          route: busData.route || busData.currentRoute || "Route Info",
-          fare: busData.fare || busData.baseFare || "100",
-          sacco: busData.sacco || busData.saccoName || "SACCO",
-          type: busData.type || "Bus",
-          image: busData.image || `https://placehold.co/600x200.png?text=${busData.plateNumber || busData.id}`,
-          imageHint: busData.imageHint || `${busData.type || 'bus'} transport`
-        };
-        
-        setFoundBusDetails(busDetails);
-        toast({ 
-          title: currentContent.busDetailsFound, 
-          description: currentContent.nganyaFoundToastDesc, 
-          className: "bg-primary text-primary-foreground" 
+      try {
+        // Try to fetch bus details from backend
+        const response = await fetch(`http://localhost:5000/api/matatus/${busIdToFind}`, {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : ''
+          }
         });
-      } else {
-        // Bus not found in database
+      
+        if (response.ok) {
+          const busData = await response.json();
+          const busDetails: ScannedBusDetails = {
+            id: busData.plateNumber || busData.id,
+            name: busData.name || busData.vehicleName,
+            route: busData.route || busData.currentRoute || "Route Info",
+            fare: busData.fare || busData.baseFare || "100",
+            sacco: busData.sacco || busData.saccoName || "SACCO",
+            type: busData.type || "Bus",
+            image: busData.image || `https://placehold.co/600x200.png?text=${busData.plateNumber || busData.id}`,
+            imageHint: busData.imageHint || `${busData.type || 'bus'} transport`
+          };
+        
+          setFoundBusDetails(busDetails);
+          toast({ 
+            title: currentContent.busDetailsFound, 
+            description: currentContent.nganyaFoundToastDesc, 
+            className: "bg-primary text-primary-foreground" 
+          });
+        } else {
+          // Bus not found in database
+          setFoundBusDetails(null);
+          setManualEntryError(currentContent.busNotFoundDesc);
+        }
+      } catch (error) {
+        console.error('Error fetching bus details:', error);
         setFoundBusDetails(null);
         setManualEntryError(currentContent.busNotFoundDesc);
       }
-    } catch (error) {
-      console.error('Error fetching bus details:', error);
-      setFoundBusDetails(null);
-      setManualEntryError(currentContent.busNotFoundDesc);
-    }
-  };
-
-  const resetManualEntry = () => {
-    setBusNumberInput("");
-    setFoundBusDetails(null);
-    setManualEntryError(null);
-    setSelectedPaymentMethod(null);
-    setPhoneNumber("");
-    setSeatCount(1);
-  }
-
-  const handleProceedToPay = async () => {
-    if (!currentBusToPay) return;
-
-    // Only validate phone number for mobile money payments
-    if (selectedPaymentMethod !== 'cash' && (!phoneNumber || !/^(07|01)\d{8}$/.test(phoneNumber))) {
-      toast({ variant: "destructive", title: currentContent.invalidPhoneTitle, description: currentContent.invalidPhoneDesc });
-      return;
-    }
-
-    const token = localStorage.getItem('matgoToken');
-    const storedUser = localStorage.getItem('matgoUser');
-    
-    const totalFare = parseFloat(currentBusToPay.fare) * seatCount;
-    const paymentData = {
-      vehicleId: currentBusToPay.id,
-      vehicleName: currentBusToPay.name || currentBusToPay.id,
-      route: currentBusToPay.route,
-      fare: parseFloat(currentBusToPay.fare),
-      totalFare: totalFare,
-      seatCount: seatCount,
-      sacco: currentBusToPay.sacco,
-      paymentMethod: selectedPaymentMethod,
-      phoneNumber: selectedPaymentMethod !== 'cash' ? phoneNumber : null,
-      paymentType: 'instant_fare',
-      userInfo: storedUser ? JSON.parse(storedUser) : null
     };
 
-    try {
-      // Submit payment to backend
-      const response = await fetch('http://localhost:5000/api/payments', {
-        method: 'POST',
-        headers: {
-          'Authorization': token ? `Bearer ${token}` : '',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(paymentData)
-      });
+    const resetManualEntry = () => {
+      setBusNumberInput("");
+      setFoundBusDetails(null);
+      setManualEntryError(null);
+      setSelectedPaymentMethod(null);
+      setPhoneNumber("");
+      setSeatCount(1);
+    };
 
-      if (response.ok) {
+    const handleProceedToPay = async () => {
+      if (!currentBusToPay) return;
+
+      // Only validate phone number for mobile money payments
+      if (selectedPaymentMethod !== 'cash' && (!phoneNumber || !/^(07|01)\d{8}$/.test(phoneNumber))) {
+        toast({ variant: "destructive", title: currentContent.invalidPhoneTitle, description: currentContent.invalidPhoneDesc });
+        return;
+      }
+
+      const token = localStorage.getItem('matgoToken');
+      const storedUser = localStorage.getItem('matgoUser');
+    
+      const totalFare = parseFloat(currentBusToPay.fare) * seatCount;
+      const paymentData = {
+        phoneNumber: phoneNumber.startsWith('0') ? phoneNumber : `0${phoneNumber}`,
+        amount: Math.round(totalFare), // Ensure amount is a whole number
+        accountReference: `MATGO-${currentBusToPay.id}`,
+        transactionDesc: `Fare payment for ${currentBusToPay.route}`,
+        metadata: {
+          vehicleId: currentBusToPay.id,
+          vehicleName: currentBusToPay.name || currentBusToPay.id,
+          route: currentBusToPay.route,
+          fare: parseFloat(currentBusToPay.fare),
+          totalFare: totalFare,
+          seatCount: seatCount,
+          sacco: currentBusToPay.sacco,
+          paymentMethod: selectedPaymentMethod,
+          paymentType: 'instant_fare',
+          userInfo: storedUser ? JSON.parse(storedUser) : null
+        }
+      };
+
+      try {
+        // For cash payments, just generate receipt
+        if (selectedPaymentMethod === 'cash') {
+          toast({
+            title: currentContent.paymentInitiatedTitle,
+            description: language === 'KSW' 
+              ? 'Lipa kwa kondakta na uonyeshe risiti hii'
+              : 'Pay the conductor and show this receipt',
+            className: "bg-green-500 text-white"
+          });
+        
+          // Generate receipt for cash payment
+          const timestamp = typeof window !== 'undefined' ? Date.now() : 0; // Use static value for SSR
+          const paymentResult = {
+            success: true,
+            transactionRef: `CASH-${timestamp}`,
+            amount: totalFare
+          };
+          return navigateToReceipt(paymentResult);
+        }
+
+        // Submit M-Pesa payment request
+        const response = await fetch('/api/payments', {
+          method: 'POST',
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(paymentData)
+        });
+
         const paymentResult = await response.json();
         
-        toast({ 
-          title: currentContent.paymentInitiatedTitle, 
-          description: currentContent.paymentInitiatedDesc(selectedPaymentMethod === "mpesa" ? "M-Pesa" : "Airtel Money", currentBusToPay.fare, phoneNumber),
-          className: "bg-green-500 text-white"
-        });
+        if (response.ok && paymentResult.data) {
+          // Show STK push notification
+          toast({ 
+            title: language === 'KSW' ? 'Angalia Simu Yako' : 'Check Your Phone',
+            description: language === 'KSW'
+              ? `Thibitisha malipo ya Ksh ${totalFare} kwenye simu yako`
+              : `Confirm payment of Ksh ${totalFare} on your phone`,
+            className: "bg-green-500 text-white"
+          });
         
-        // Generate passenger names based on seat count
-        const passengerNames = [];
-        const userName = storedUser ? JSON.parse(storedUser).firstName : (language === 'KSW' ? "Abiria" : "Passenger");
-        for (let i = 0; i < seatCount; i++) {
-          if (i === 0) {
-            passengerNames.push(userName);
-          } else {
-            passengerNames.push(`${userName} +${i}`);
+          // Generate passenger names based on seat count
+          const passengerNames = [];
+          const userName = storedUser ? JSON.parse(storedUser).firstName : (language === 'KSW' ? "Abiria" : "Passenger");
+          for (let i = 0; i < seatCount; i++) {
+            if (i === 0) {
+              passengerNames.push(userName);
+            } else {
+              passengerNames.push(`${userName} +${i}`);
+            }
           }
-        }
         
-        // Generate seat numbers based on seat count
-        const seatNumbers = [];
-        for (let i = 1; i <= seatCount; i++) {
-          seatNumbers.push(`S${i}`);
-        }
+          // Generate seat numbers based on seat count
+          const seatNumbers = [];
+          for (let i = 1; i <= seatCount; i++) {
+            seatNumbers.push(`S${i}`);
+          }
         
-        const paymentMethodText = selectedPaymentMethod === 'mpesa' ? 'M-Pesa' :
-                                 selectedPaymentMethod === 'airtel' ? 'Airtel Money' : 'Cash';
+          const paymentMethodText = selectedPaymentMethod === 'mpesa' ? 'M-Pesa' :
+                                   selectedPaymentMethod === 'airtel' ? 'Airtel Money' : 'Cash';
         
-        // Construct query parameters for the receipt page with real payment data
-        const queryParams = new URLSearchParams({
-          route: currentBusToPay.route,
-          date: new Date().toISOString().split('T')[0],
-          time: new Date().toLocaleTimeString(language === 'KSW' ? 'sw-KE' : 'en-US', { hour: '2-digit', minute: '2-digit' }),
-          seats: seatNumbers.join(", "),
-          price: String(totalFare),
-          passengers: passengerNames.join(", "),
-          paymentMethod: paymentMethodText,
-          vehicleInfo: currentBusToPay.name || currentBusToPay.id,
-          vehicleImage: currentBusToPay.image || `https://placehold.co/600x200.png?text=${currentBusToPay.id}`,
-          vehicleImageHint: currentBusToPay.imageHint || `${currentBusToPay.type.toLowerCase()} bus`,
-          sacco: currentBusToPay.sacco,
-          tripType: language === 'KSW' ? "Nauli ya Moja kwa Moja" : "Instant Fare",
-          paymentId: paymentResult.paymentId || paymentResult.id,
-          transactionRef: paymentResult.transactionRef || paymentResult.reference,
-          seatCount: String(seatCount)
-        }).toString();
+          // Construct query parameters for the receipt page with real payment data
+          const queryParams = new URLSearchParams({
+            route: currentBusToPay.route,
+            date: new Date().toISOString().split('T')[0],
+            time: new Date().toLocaleTimeString(language === 'KSW' ? 'sw-KE' : 'en-US', { hour: '2-digit', minute: '2-digit' }),
+            seats: seatNumbers.join(", "),
+            price: String(totalFare),
+            passengers: passengerNames.join(", "),
+            paymentMethod: paymentMethodText,
+            vehicleInfo: currentBusToPay.name || currentBusToPay.id,
+            vehicleImage: currentBusToPay.image || `https://placehold.co/600x200.png?text=${currentBusToPay.id}`,
+            vehicleImageHint: currentBusToPay.imageHint || `${currentBusToPay.type.toLowerCase()} bus`,
+            sacco: currentBusToPay.sacco,
+            tripType: language === 'KSW' ? "Nauli ya Moja kwa Moja" : "Instant Fare",
+            paymentId: paymentResult.data?.CheckoutRequestID || paymentResult.id || '',
+            transactionRef: paymentResult.data?.MerchantRequestID || paymentResult.transactionRef || '',
+            seatCount: String(seatCount)
+          }).toString();
 
-        router.push(`/receipt/sample?${queryParams}`);
-      } else {
-        throw new Error('Payment failed');
-      }
-    } catch (error) {
-      console.error('Error processing payment:', error);
-      
-      // Still show success message and navigate to receipt for user experience
-      // In a real app, you might want to show an error and retry
-      toast({ 
-        title: currentContent.paymentInitiatedTitle, 
-        description: currentContent.paymentInitiatedDesc(selectedPaymentMethod === "mpesa" ? "M-Pesa" : "Airtel Money", currentBusToPay.fare, phoneNumber),
-        className: "bg-green-500 text-white"
-      });
-      
-      // Generate passenger names based on seat count
-      const passengerNames = [];
-      const userName = storedUser ? JSON.parse(storedUser).firstName : (language === 'KSW' ? "Abiria" : "Passenger");
-      for (let i = 0; i < seatCount; i++) {
-        if (i === 0) {
-          passengerNames.push(userName);
+          router.push(`/receipt/sample?${queryParams}`);
         } else {
-          passengerNames.push(`${userName} +${i}`);
+          // Handle specific M-Pesa error cases
+          const errorMessage = paymentResult.message || 'Payment failed';
+          throw new Error(errorMessage);
         }
+      } catch (error: any) {
+        console.error('Error processing payment:', error);
+      
+        const errorMessage = error.message || (language === 'KSW' 
+          ? 'Malipo yameshindikana. Tafadhali jaribu tena.'
+          : 'Payment failed. Please try again.');
+        
+        toast({ 
+          variant: "destructive",
+          title: language === 'KSW' ? 'Hitilafu ya Malipo' : 'Payment Error',
+          description: errorMessage,
+        });
+      
+        // Navigate to receipt page with payment details
+        // If paymentResult is not defined due to error, skip navigation
+        // (prevents reference error)
+        // return navigateToReceipt(paymentResult);
       }
-      
-      // Generate seat numbers based on seat count
-      const seatNumbers = [];
-      for (let i = 1; i <= seatCount; i++) {
-        seatNumbers.push(`S${i}`);
-      }
-      
-      const paymentMethodText = selectedPaymentMethod === 'mpesa' ? 'M-Pesa' :
-                               selectedPaymentMethod === 'airtel' ? 'Airtel Money' : 'Cash';
-      
-      // Construct query parameters for the receipt page
+    };
+
+    const navigateToReceipt = (paymentResult: any) => {
+      if (!currentBusToPay) return;
+    
+      // Generate query params for receipt
       const queryParams = new URLSearchParams({
-        route: currentBusToPay.route,
-        date: new Date().toISOString().split('T')[0],
-        time: new Date().toLocaleTimeString(language === 'KSW' ? 'sw-KE' : 'en-US', { hour: '2-digit', minute: '2-digit' }),
-        seats: seatNumbers.join(", "),
-        price: String(totalFare),
-        passengers: passengerNames.join(", "),
-        paymentMethod: paymentMethodText,
-        vehicleInfo: currentBusToPay.name || currentBusToPay.id,
-        vehicleImage: currentBusToPay.image || `https://placehold.co/600x200.png?text=${currentBusToPay.id}`,
-        vehicleImageHint: currentBusToPay.imageHint || `${currentBusToPay.type.toLowerCase()} bus`,
-        sacco: currentBusToPay.sacco,
-        tripType: language === 'KSW' ? "Nauli ya Moja kwa Moja" : "Instant Fare",
+        vehicleName: currentBusToPay.name || currentBusToPay.id || '',
+        route: currentBusToPay.route || '',
+        sacco: currentBusToPay.sacco || '',
+        fare: String(currentBusToPay.fare || 0),
+        totalFare: String(parseFloat(currentBusToPay.fare || '0') * seatCount),
+        paymentMethod: selectedPaymentMethod || '',
+        phoneNumber: phoneNumber || '',
+        transactionRef: paymentResult.CheckoutRequestID || paymentResult.transactionRef || '',
         seatCount: String(seatCount)
       }).toString();
 
+      // Navigate to receipt page
       router.push(`/receipt/sample?${queryParams}`);
-    }
-  };
+    };
 
-  const renderPaymentFlow = (busToPay: ScannedBusDetails) => (
+    const renderPaymentFlow = (busToPay: ScannedBusDetails) => (
     <Card className="mt-6 text-left p-4 md:p-6 bg-primary/5 border border-primary/30 rounded-xl glassy-card">
       <CardHeader className="p-0 pb-4">
         <CardTitle className="text-2xl text-primary flex items-center gap-2"><CheckCircle className="h-7 w-7 text-green-500"/> {currentContent.scanSuccessfulTitle}</CardTitle>
@@ -504,7 +486,6 @@ export default function ScanPage() {
         <p><strong>{currentContent.routeLabel}</strong> {busToPay.route}</p>
         <p><strong>{currentContent.saccoLabel}</strong> {busToPay.sacco}</p>
         <p className="text-xl font-bold text-accent"><strong>{currentContent.fareLabel}</strong> Ksh {busToPay.fare} {language === 'KSW' ? 'kwa kiti' : 'per seat'}</p>
-        
         {/* Seat Count Selection */}
         <div className="mt-4 p-4 bg-muted/30 rounded-lg">
           <Label className="font-semibold text-base">{currentContent.seatCountLabel}</Label>
@@ -538,7 +519,7 @@ export default function ScanPage() {
             {language === 'KSW' ? 'Jumla' : 'Total'}: Ksh {(parseFloat(busToPay.fare) * seatCount).toLocaleString()}
           </p>
         </div>
-        
+        {/* Payment Method Selection */}
         {!selectedPaymentMethod ? (
           <div className="mt-6 space-y-3">
             <h3 className="font-semibold text-lg text-center text-primary">{language === 'KSW' ? 'Chagua Njia ya Malipo:' : 'Select Payment Method:'}</h3>
@@ -567,7 +548,6 @@ export default function ScanPage() {
                 />
               </div>
             )}
-            
             {selectedPaymentMethod === 'cash' && (
               <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                 <p className="text-green-800 dark:text-green-200 font-semibold">
@@ -581,7 +561,6 @@ export default function ScanPage() {
                 </p>
               </div>
             )}
-            
             <Button onClick={handleProceedToPay} size="lg" className="w-full text-lg py-3 rounded-lg btn-glow-accent">
               <DollarSign className="mr-2 h-5 w-5"/>
               {selectedPaymentMethod === 'cash'
@@ -594,7 +573,6 @@ export default function ScanPage() {
             </Button>
           </div>
         )}
-
         <div className="mt-6 border-t border-primary/20 pt-4">
           <Button size="lg" variant="outline" onClick={() => { setMode("options"); resetManualEntry(); setQrScannedBusDetails(null); setScannedData(null); }} className="w-full text-lg py-3 rounded-lg border-primary text-primary hover:bg-primary/10">
             <ArrowLeft className="mr-2 h-5 w-5"/> {currentContent.backButton}
@@ -603,8 +581,6 @@ export default function ScanPage() {
       </CardContent>
     </Card>
   );
-
-
   return (
     <AppLayout>
       <div className="space-y-8 animate-fade-in">

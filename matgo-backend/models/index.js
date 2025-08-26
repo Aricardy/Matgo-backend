@@ -4,13 +4,13 @@ import sequelize from '../config/db.js';
 import User from './User.js';
 import Passenger from './Passenger.js';
 import Driver from './Driver.js';
-import Conductor from './Conductor.js';
 import Matatu from './Matatu.js';
 import Trip from './Trip.js';
 import Admin from './Admin.js';
 import SaccoAdmin from './SaccoAdmin.js';
 import Booking from './Booking.js';
 import Route from './Route.js';
+import RoutePrice from './RoutePrice.js';
 
 // Sync all models
 
@@ -34,11 +34,11 @@ export {
   User,
   Passenger,
   Driver,
-  Conductor,
   Matatu,
   Trip,
   Admin,
   SaccoAdmin,
   Booking,
-  Route
+  Route,
+  RoutePrice
 };

@@ -1,4 +1,3 @@
-
 "use client";
 
 import AppLayout from "@/components/layout/AppLayout";
@@ -7,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LogOut, PlayCircle, StopCircle, ClipboardList, MessageSquare, Star } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -15,6 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
+import { QRCodeCanvas } from "qrcode.react";
+import { useQRCodeScanner } from "@/hooks/useQRCodeScanner";
 
 interface CrewMember {
     name: string;
@@ -46,6 +47,9 @@ export default function CrewDashboardPage() {
   const [isTripActive, setIsTripActive] = useState(false);
   const [currentRoute, setCurrentRoute] = useState("Ngong - Town"); // This would be dynamic
   const [passengerCount, setPassengerCount] = useState(0); 
+
+  const qrScannerRef = useRef(null);
+  const { scanQRCode, scannedData, error } = useQRCodeScanner(qrScannerRef);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -125,26 +129,25 @@ export default function CrewDashboardPage() {
                             }));
                             setTripLog(userTrips);
                         }
-                        
+
                         // Fetch SACCO messages
                         const messagesResponse = await fetch('/api/messages/sacco', {
-                            headers: {
-                                'Authorization': token ? `Bearer ${token}` : ''
-                            }
+                          headers: {
+                            'Authorization': token ? `Bearer ${token}` : ''
+                          }
                         });
-                        
+
                         if (messagesResponse.ok) {
-                            const messages = await messagesResponse.json();
-                            const formattedMessages = messages.map((msg: any) => ({
-                                id: msg.id,
-                                message: msg.content || msg.message,
-                                timestamp: msg.timestamp || msg.createdAt,
-                                sender: msg.sender || msg.senderName || 'SACCO Admin',
-                                isFromAdmin: msg.isFromAdmin || msg.sender === 'admin'
-                            }));
-                            setSaccoMessages(formattedMessages);
+                          const messages = await messagesResponse.json();
+                          const formattedMessages = messages.map((msg: any) => ({
+                            id: msg.id,
+                            message: msg.content || msg.message,
+                            timestamp: msg.timestamp || msg.createdAt,
+                            sender: msg.sender || msg.senderName || 'SACCO Admin',
+                            isFromAdmin: msg.isFromAdmin || msg.sender === 'admin'
+                          }));
+                          setSaccoMessages(formattedMessages);
                         }
-                        
                     } catch (error) {
                         console.error('Error fetching crew data:', error);
                         // Fallback to stored user data
@@ -549,6 +552,19 @@ export default function CrewDashboardPage() {
                     </CardContent>
                 </Card>
                 <Button onClick={handleLogout} variant="outline" className="w-full md:w-auto border-destructive text-destructive hover:bg-destructive/10"><LogOut className="mr-2 h-4 w-4"/>{currentText.logout}</Button>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-lg glassy-card">
+              <CardHeader>
+                <CardTitle className="font-headline text-2xl text-accent">QR Code</CardTitle>
+              </CardHeader>
+              <CardContent className="flex justify-center items-center">
+                {crewMember?.busReg ? (
+                  <QRCodeCanvas value={crewMember.busReg} size={128} />
+                ) : (
+                  <p className="text-muted-foreground">No QR Code available</p>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

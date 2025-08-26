@@ -1,0 +1,913 @@
+# MatGo Transportation System
+
+## Project Overview
+
+MatGo is a comprehensive Kenyan matatu and bus management system built with:
+- Backend: Node.js + Express + MySQL (Sequelize ORM)
+- Frontend: Next.js + TypeScript + TailwindCSS
+- Authentication: JWT
+- Payments: M-Pesa Integration
+
+## Backend Code
+
+### Server Configuration
+
+#### Main Server (index.js)
+```javascript
+// File: matgo-backend/index.js
+import express from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
+import { syncAll } from './models/index.js';
+import sequelize from './config/db.js';
+
+// Import all routes
+import tripsRoutes from "./routes/trips.js";
+import matatusRoutes from "./routes/matatus.js";
+import bookingsRoutes from "./routes/bookings.js";
+import passengerRoutes from './routes/passengerRoutes.js';
+import driverRoutes from './routes/driverRoutes.js';
+import tripRoutes from './routes/tripRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+import bookingAltRoutes from './routes/booking.js';
+import adminRoutes from './routes/admin.js';
+import saccoAdminRoutes from './routes/sacco_admin.js';
+import featuredMatatusRoutes from './routes/featuredMatatus.js';
+import approvalsRoutes from './routes/approvals.js';
+import auditLogsRoutes from './routes/audit-logs.js';
+import maintenanceRoutes from './routes/maintenance.js';
+import personnelRoutes from './routes/personnel.js';
+import adminProfileRoutes from './routes/adminProfile.js';
+import reportsRoutes from './routes/reports.js';
+import systemHealthRoutes from './routes/systemHealth.js';
+import usersRoutes from './routes/users.js';
+import routesRoutes from './routes/routes.js';
+import statsRoutes from './routes/statsRoutes.js';
+import paymentsRoutes from './routes/payments.js';
+import longDistanceRoutes from './routes/long-distance.js';
+
+dotenv.config();
+
+const app = express();
+
+// Middleware setup
+app.use(cors({ origin: 'http://localhost:9002', credentials: true }));
+app.use(express.json());
+app.use(cookieParser());
+
+// Static files
+app.use('/uploads', express.static('uploads'));
+
+// Routes setup
+app.use('/api/auth', authRoutes);
+app.use('/api/matatus', matatusRoutes);
+app.use('/api/trips', tripsRoutes);
+app.use('/api/bookings', bookingsRoutes);
+app.use('/api/passengers', passengerRoutes);
+app.use('/api/drivers', driverRoutes);
+app.use('/api/payments', paymentsRoutes);
+app.use('/api/long-distance', longDistanceRoutes);
+
+// Admin routes
+app.use('/api/admin/approvals', approvalsRoutes);
+app.use('/api/admin/audit-logs', auditLogsRoutes);
+app.use('/api/admin/maintenance', maintenanceRoutes);
+app.use('/api/admin/personnel', personnelRoutes);
+app.use('/api/admin/profile', adminProfileRoutes);
+app.use('/api/admin/reports', reportsRoutes);
+app.use('/api/admin/system-health', systemHealthRoutes);
+
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+```
+
+### Models
+
+#### User Model (User.js)
+```javascript
+// File: matgo-backend/models/User.js
+import { Model, DataTypes } from 'sequelize';
+import bcrypt from 'bcrypt';
+import sequelize from '../config/db.js';
+
+class User extends Model {
+  static async hashPassword(password) {
+    return await bcrypt.hash(password, 10);
+  }
+
+  async validatePassword(password) {
+    return await bcrypt.compare(password, this.password);
+  }
+}
+
+User.init({
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+      isEmail: true
+    }
+  },
+  phone: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  role: {
+    type: DataTypes.ENUM('passenger', 'driver', 'conductor', 'admin', 'sacco_admin'),
+    allowNull: false
+  },
+  profilePic: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  status: {
+    type: DataTypes.ENUM('active', 'inactive', 'suspended'),
+    defaultValue: 'active'
+  },
+  refreshToken: {
+    type: DataTypes.STRING,
+    allowNull: true
+  }
+}, {
+  sequelize,
+  modelName: 'User',
+  timestamps: true
+});
+
+export default User;
+```
+
+#### Matatu Model (Matatu.js)
+```javascript
+// File: matgo-backend/models/Matatu.js
+import { Model, DataTypes } from 'sequelize';
+import sequelize from '../config/db.js';
+
+class Matatu extends Model {}
+
+Matatu.init({
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true
+  },
+  plateNumber: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true
+  },
+  saccoId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    references: {
+      model: 'Saccos',
+      key: 'id'
+    }
+  },
+  capacity: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  route: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  features: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  status: {
+    type: DataTypes.ENUM('active', 'maintenance', 'inactive'),
+    defaultValue: 'active'
+  },
+  lastMaintenance: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  insuranceExpiry: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  photos: {
+    type: DataTypes.JSON,
+    allowNull: true
+  }
+}, {
+  sequelize,
+  modelName: 'Matatu',
+  timestamps: true
+});
+
+export default Matatu;
+```
+
+### Controllers
+
+#### Auth Controller (authController.js)
+```javascript
+// File: matgo-backend/controllers/authController.js
+import User from '../models/User.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { generateToken, sanitizeUser } from '../utils/authUtils.js';
+
+export const signupUser = async (req, res) => {
+  try {
+    const { name, email, phone, password, role } = req.body;
+    
+    // Check if user exists
+    const existingUser = await User.findOne({ 
+      where: { 
+        [Op.or]: [{ email }, { phone }]
+      }
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ 
+        message: 'User already exists with this email or phone' 
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await User.hashPassword(password);
+
+    // Create user
+    const user = await User.create({
+      name,
+      email,
+      phone,
+      password: hashedPassword,
+      role,
+      profilePic: req.files?.profilePic?.[0]?.path
+    });
+
+    // Generate tokens
+    const { accessToken, refreshToken } = generateToken(user);
+
+    // Save refresh token
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
+    res.status(201).json({
+      user: sanitizeUser(user),
+      accessToken
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error creating user' });
+  }
+};
+
+export const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Find user
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Verify password
+    const isValid = await user.validatePassword(password);
+    if (!isValid) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Check status
+    if (user.status !== 'active') {
+      return res.status(403).json({ 
+        message: 'Account is not active. Please contact support.' 
+      });
+    }
+
+    // Generate tokens
+    const { accessToken, refreshToken } = generateToken(user);
+
+    // Save refresh token
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
+    res.json({
+      user: sanitizeUser(user),
+      accessToken
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error logging in' });
+  }
+};
+
+export const refreshToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.cookies;
+    if (!refreshToken) {
+      return res.status(401).json({ message: 'No refresh token' });
+    }
+
+    // Verify token
+    const decoded = jwt.verify(
+      refreshToken, 
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    // Find user
+    const user = await User.findOne({ 
+      where: { 
+        id: decoded.id,
+        refreshToken 
+      }
+    });
+
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid refresh token' });
+    }
+
+    // Generate new tokens
+    const tokens = generateToken(user);
+
+    // Update refresh token
+    user.refreshToken = tokens.refreshToken;
+    await user.save();
+
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
+    res.json({ accessToken: tokens.accessToken });
+  } catch (error) {
+    console.error(error);
+    res.status(401).json({ message: 'Invalid refresh token' });
+  }
+};
+
+export const getMe = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+    res.json({ user: sanitizeUser(user) });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching user' });
+  }
+};
+```
+
+### Middleware
+
+#### Auth Middleware (auth.js)
+```javascript
+// File: matgo-backend/middleware/auth.js
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
+
+export default async function auth(req, res, next) {
+  try {
+    // Get token
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+    // Find user
+    const user = await User.findByPk(decoded.id);
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+
+    // Check status
+    if (user.status !== 'active') {
+      return res.status(403).json({ 
+        message: 'Account is not active' 
+      });
+    }
+
+    // Attach user to request
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error(error);
+    res.status(401).json({ message: 'Invalid token' });
+  }
+}
+```
+
+#### Upload Middleware (upload.js)
+```javascript
+// File: matgo-backend/middleware/upload.js
+import multer from 'multer';
+import path from 'path';
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  // Accept images only
+  if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
+    req.fileValidationError = 'Only image files are allowed!';
+    return cb(new Error('Only image files are allowed!'), false);
+  }
+  cb(null, true);
+};
+
+const limits = {
+  fileSize: 5 * 1024 * 1024 // 5MB max-limit
+};
+
+export default multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: limits
+});
+```
+
+## Frontend Code
+
+### Configuration
+
+#### Next.js Config (next.config.ts)
+```typescript
+// File: matgo-frontend/next.config.ts
+import type { NextConfig } from 'next';
+
+const nextConfig: NextConfig = {
+  reactStrictMode: true,
+  images: {
+    domains: ['localhost'],
+  },
+  experimental: {
+    serverActions: true,
+  },
+};
+
+export default nextConfig;
+```
+
+### Layouts
+
+#### Root Layout (layout.tsx)
+```typescript
+// File: matgo-frontend/src/app/layout.tsx
+export const metadata: Metadata = {
+  title: 'MatGo: Kenyan Matatu & Bus System',
+  description: 'The future of Kenyan public transport. Pay, track, and book your rides seamlessly.',
+  openGraph: {
+    title: 'MatGo: Kenyan Matatu & Bus System',
+    description: 'The future of Kenyan public transport. Pay, track, and book your rides seamlessly.',
+    url: 'https://matgo.example.com',
+    siteName: 'MatGo',
+    locale: 'en_KE',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'MatGo: Kenyan Matatu & Bus System',
+    description: 'The future of Kenyan public transport. Pay, track, and book your rides seamlessly.',
+    images: ['https://matgo.example.com/og-image.png'],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: 'hsl(195 96% 70%)' },
+    { media: '(prefers-color-scheme: dark)', color: 'hsl(240 6% 10%)' },
+  ],
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1, 
+  userScalable: false,
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Belleza&display=swap" rel="stylesheet" />
+        <meta name="application-name" content="MatGo" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="MatGo" />
+        <meta name="format-detection" content="telephone=no" />
+      </head>
+      <body className="font-body antialiased bg-background">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system" 
+          enableSystem
+          disableTransitionOnChange
+        >
+          <LanguageProvider>
+            <SplashScreen />
+            {children}
+            <Toaster />
+          </LanguageProvider>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+#### Admin Layout (admin/layout.tsx)
+```typescript
+// File: matgo-frontend/src/app/admin/layout.tsx
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import Header from "@/components/layout/Header";
+import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  Home,
+  Building,
+  Bus,
+  UserCheck,
+  Users,
+  ClipboardList,
+  MessageSquareWarning,
+  Award,
+  FileCheck,
+  ShieldCheck,
+  LineChart,
+  User,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+  Settings,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  const { language } = useLanguage();
+
+  const content = {
+    ENG: {
+      systemAdmin: "System Admin",
+      saccoAdmin: "SACCO Admin",
+      dashboard: "Dashboard",
+      management: "Management",
+      saccos: "Saccos",
+      buses: "Buses & Nganyas",
+      personnel: "Personnel",
+      allUsers: "All Users",
+      operations: "Operations",
+      bookings: "Bookings",
+      reports: "Passenger Reports",
+      promotions: "Promotions",
+      system: "System",
+      approvals: "Approvals",
+      auditLogs: "Audit Logs",
+      profileSettings: "Profile & Settings",
+      logout: "Logout",
+      myFleet: "My Fleet",
+      myCrew: "My Crew",
+      saccoReports: "SACCO Reports",
+      saccoProfile: "Sacco Profile",
+      systemHealth: "System Health",
+      maintenance: "Maintenance"
+    },
+    SWA: {
+      // Swahili translations...
+    }
+  };
+
+  const currentContent = content[language];
+
+  return (
+    <div className="flex min-h-screen">
+      <aside className={cn(
+        "fixed left-0 top-0 z-40 h-screen border-r border-border bg-background transition-all duration-300",
+        isCollapsed ? "w-[4.5rem]" : "w-64"
+      )}>
+        {/* Sidebar content */}
+      </aside>
+      <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
+        {children}
+      </main>
+    </div>
+  );
+}
+```
+
+#### App Layout (layout/AppLayout.tsx)
+```typescript
+// File: matgo-frontend/src/components/layout/AppLayout.tsx
+import type { ReactNode } from 'react';
+import Header from './Header';
+import BottomNav from './BottomNav';
+
+interface AppLayoutProps {
+  children: ReactNode;
+}
+
+export default function AppLayout({ children }: AppLayoutProps) {
+  return (
+    <div className="flex min-h-screen flex-col">
+      <Header />
+      <main className="flex-1 container py-6 md:py-8 pb-24 md:pb-28">
+        {children}
+      </main>
+      <BottomNav />
+    </div>
+  );
+}
+```
+
+### Pages
+
+#### Dashboard Page (dashboard/page.tsx)
+```typescript
+// File: matgo-frontend/src/app/dashboard/page.tsx
+"use client";
+
+import AppLayout from "@/components/layout/AppLayout";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { ArrowRight, MapPin, Clock, Star, Edit3, Zap, BusFront, QrCode, BellRing, ShieldCheck, RadioTower, Palette, HelpCircle, Coins } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import React, { useState, useEffect } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Skeleton } from "@/components/ui/skeleton";
+
+interface FavoriteRoute {
+  id: string;
+  name: string;
+  start: string;
+  end: string;
+  price: number;
+}
+
+interface FavoriteMatatu {
+  id: string;
+  plateNumber: string;
+  name: string;
+  route: string;
+  rating: number;
+}
+
+interface NearbyMatatu {
+  id: string;
+  plateNumber: string;
+  name: string;
+  route: string;
+  distance: string;
+  eta: string;
+}
+
+export default function DashboardPage() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [favoriteRoutes, setFavoriteRoutes] = useState<FavoriteRoute[]>([]);
+  const [favoriteMatatus, setFavoriteMatatus] = useState<FavoriteMatatu[]>([]);
+  const [nearbyMatatus, setNearbyMatatus] = useState<NearbyMatatu[]>([]);
+  const { language } = useLanguage();
+
+  useEffect(() => {
+    // Fetch data
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Skeleton className="h-48 w-full rounded-xl"/>
+            <Skeleton className="h-48 w-full rounded-xl"/>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  return (
+    <AppLayout>
+      <div className="space-y-8 animate-fade-in">
+        {/* Dashboard content */}
+      </div>
+    </AppLayout>
+  );
+}
+```
+
+#### Booking Page (book/page.tsx)
+```typescript
+// File: matgo-frontend/src/app/book/page.tsx
+"use client";
+
+import AppLayout from "@/components/layout/AppLayout";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon, MapPinned, Clock, Users, Armchair, AlertCircle, CreditCard, MinusCircle, PlusCircle, Palette, Sparkles, ArrowRight, CheckCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import React, { useState, useEffect } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
+import Image from "next/image";
+
+export default function BookingPage() {
+  const [date, setDate] = useState<Date>();
+  const [selectedRoute, setSelectedRoute] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
+  const [passengers, setPassengers] = useState(1);
+  const { toast } = useToast();
+
+  const handleBooking = async () => {
+    // Booking logic
+  };
+
+  return (
+    <AppLayout>
+      <div className="max-w-4xl mx-auto space-y-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Book Your Ride</CardTitle>
+            <CardDescription>Choose your route, date, and time</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Booking form */}
+          </CardContent>
+        </Card>
+      </div>
+    </AppLayout>
+  );
+}
+```
+
+### Components
+
+#### Form Components
+```typescript
+// File: matgo-frontend/src/components/ui/form.tsx
+"use client"
+
+import * as React from "react"
+import * as LabelPrimitive from "@radix-ui/react-label"
+import { Slot } from "@radix-ui/react-slot"
+import {
+  Controller,
+  FormProvider,
+  useFormContext,
+  type ControllerProps,
+  type FieldPath,
+  type FieldValues,
+} from "react-hook-form"
+import { cn } from "@/lib/utils"
+import { Label } from "@/components/ui/label"
+
+const Form = FormProvider
+
+type FormFieldContextValue<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+> = {
+  name: TName
+}
+
+const FormFieldContext = React.createContext<FormFieldContextValue>(
+  {} as FormFieldContextValue
+)
+
+const FormField = <
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+>({
+  ...props
+}: ControllerProps<TFieldValues, TName>) => {
+  return (
+    <FormFieldContext.Provider value={{ name: props.name }}>
+      <Controller {...props} />
+    </FormFieldContext.Provider>
+  )
+}
+
+// Additional form components...
+```
+
+### Utilities and Hooks
+
+#### API Utilities (lib/api.ts)
+```typescript
+// File: matgo-frontend/src/lib/api.ts
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+
+export async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers,
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export const api = {
+  auth: {
+    login: (data: LoginData) => 
+      fetchWithAuth('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    signup: (data: SignupData) =>
+      fetchWithAuth('/auth/signup', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    logout: () =>
+      fetchWithAuth('/auth/logout', {
+        method: 'POST',
+      }),
+  },
+  bookings: {
+    create: (data: BookingData) =>
+      fetchWithAuth('/bookings', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    getAll: () =>
+      fetchWithAuth('/bookings'),
+    getOne: (id: string) =>
+      fetchWithAuth(`/bookings/${id}`),
+  },
+  // More API endpoints...
+};
+```

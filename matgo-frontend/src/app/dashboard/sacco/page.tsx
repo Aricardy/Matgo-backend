@@ -21,9 +21,28 @@ interface SaccoStats {
 
 export default function SaccoAdminDashboard() {
   const { language } = useLanguage();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<SaccoStats | null>(null);
   const [saccoName, setSaccoName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('matgoToken');
+      const user = localStorage.getItem('matgoUser');
+      
+      if (!token || !user) {
+        router.push('/login');
+        return;
+      }
+
+      const userData = JSON.parse(user);
+      if (userData.role !== 'sacco_admin') {
+        router.push('/login');
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   useEffect(() => {
     const fetchData = async () => {

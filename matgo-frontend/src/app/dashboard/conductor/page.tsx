@@ -1,10 +1,9 @@
 
 "use client";
 
-import CrewDashboardPage from "@/app/dashboard/conductor/page";
+import CrewDashboardPage from "@/app/crew/dashboard/page";
 
-// This page simply re-uses the CrewDashboardPage component.
-// It exists to satisfy the /dashboard/conductor route.
+// This page re-uses the CrewDashboardPage component for conductors.
 export default function ConductorDashboardPage() {
   return <CrewDashboardPage />;
 }

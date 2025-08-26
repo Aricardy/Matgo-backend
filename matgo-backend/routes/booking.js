@@ -1,5 +1,6 @@
 import express from 'express';
 import Booking from '../models/Booking.js';
+import { getBestFare } from '../utils/fareUtils.js';
 import auth from '../middleware/auth.js';
 const router = express.Router();
 
@@ -19,8 +20,20 @@ router.get('/', auth, async (req, res) => {
 // Book a trip
 router.post('/', auth, async (req, res) => {
   try {
+    const { route_id, sacco_id, direction, road, time, ...rest } = req.body;
+    // Calculate fare from RoutePrices
+    const price = await getBestFare({ route_id, sacco_id, direction, road, time });
+    if (price == null) {
+      return res.status(400).json({ error: 'No fare found for the selected route/time.' });
+    }
     const bookingData = {
-      ...req.body,
+      ...rest,
+      route: route_id,
+      sacco: sacco_id,
+      direction,
+      road,
+      time,
+      totalPrice: price,
       passengerId: req.user.id,
       status: 'confirmed'
     };

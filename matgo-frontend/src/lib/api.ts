@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 let isRefreshing = false;
 let refreshSubscribers: ((token: string) => void)[] = [];
 
@@ -59,7 +59,40 @@ async function refreshAccessToken() {
   }
 }
 
-export async function apiFetch(endpoint: string, options: RequestInit = {}) {
+// Refresh the token and retry the original request
+async function refreshAndRetry(endpoint: string, options: RequestInit): Promise<any> {
+  try {
+    const refreshToken = localStorage.getItem('matgoRefreshToken');
+    if (!refreshToken) throw new Error('No refresh token available');
+
+    // Request a new access token
+    const response = await fetch(`${API_URL}/auth/refresh-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to refresh token');
+    }
+
+    const { accessToken } = await response.json();
+    localStorage.setItem('matgoToken', accessToken);
+
+    // Retry the original request with the new token
+    return apiFetch(endpoint, options);
+  } catch (error) {
+    console.error('Token refresh failed:', error);
+    localStorage.removeItem('matgoToken');
+    localStorage.removeItem('matgoUser');
+    localStorage.removeItem('matgoRefreshToken');
+    window.location.href = '/login';
+    throw error;
+  }
+}
+
+// Update apiFetch to handle token refresh
+export async function apiFetch(endpoint: string, options: RequestInit = {}): Promise<any> {
   // Skip token for login/register endpoints only, not all auth endpoints
   const isPublicAuthEndpoint = endpoint === '/auth/login' || endpoint === '/auth/register' || endpoint === '/refresh-token';
   
@@ -87,14 +120,8 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     });
 
     // If unauthorized and not already refreshing, try to refresh the token
-    // Note: Refresh token functionality is disabled since backend doesn't support it
     if (response.status === 401 && !isPublicAuthEndpoint && token) {
-      // For now, just clear auth data and redirect to login
-      // TODO: Implement refresh token endpoint in backend if needed
-      localStorage.removeItem('matgoToken');
-      localStorage.removeItem('matgoUser');
-      window.location.href = '/login';
-      return Promise.reject('Session expired. Please log in again.');
+      return refreshAndRetry(endpoint, options);
     }
 
     const data = await response.json();

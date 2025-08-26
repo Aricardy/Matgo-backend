@@ -89,7 +89,7 @@ export default function LoginPage() {
         : { phone: username, password };
 
       console.log('Sending login request to backend...', loginPayload);
-      const response = await axios.post('http://localhost:5000/api/auth/login', 
+  const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, 
         loginPayload,
         {
           headers: {
@@ -125,18 +125,28 @@ export default function LoginPage() {
         className: "bg-green-500 text-white",
       });
       
+      // Ensure user role is correctly set
+      if (data.user.role === "system_admin") {
+        data.user.role = "admin"; // Map system_admin to admin in localStorage
+      }
+
+      // Store updated user data
+      localStorage.setItem('matgoUser', JSON.stringify(data.user));
+
       // Redirect based on user role
-      const role = data.user.role === "system_admin" ? "admin" : data.user.role;
       const dashboardPaths = {
         'admin': '/dashboard/admin',
         'sacco_admin': '/dashboard/sacco',
         'driver': '/dashboard/driver',
         'conductor': '/dashboard/conductor',
         'passenger': '/dashboard/passenger'
-      };
-      
-      // Default to passenger dashboard if role not found
-      const targetPath = dashboardPaths[role] || '/dashboard/passenger';
+      } as const;
+
+      type RoleKey = keyof typeof dashboardPaths;
+      const role: RoleKey = (Object.keys(dashboardPaths).includes(data.user.role) ? data.user.role : 'passenger') as RoleKey;
+
+      // Set target path based on role
+      const targetPath = dashboardPaths[role];
       window.location.href = targetPath;
     } catch (error: any) {
       console.error('Login error:', error);

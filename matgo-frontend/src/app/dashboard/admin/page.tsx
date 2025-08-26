@@ -12,7 +12,9 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
-import { requireAuth } from "@/lib/auth";
+import { getAuthToken, getCurrentUser } from "@/lib/auth";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 interface StatsResponse {
   totalMatatus?: number;
@@ -27,6 +29,14 @@ interface MonthlyAnalytics {
   reports: number;
 }
 
+interface ApiError {
+  response?: {
+    status: number;
+    data?: any;
+  };
+  message?: string;
+}
+
 const chartConfig = {
   totalBookings: { label: "Total Bookings", color: "hsl(var(--chart-1))" },
   revenue: { label: "Revenue (Ksh)", color: "hsl(var(--chart-2))" },
@@ -35,7 +45,84 @@ const chartConfig = {
 
 export default function SystemAdminDashboard() {
   const { language } = useLanguage();
+  const router = useRouter();
+  const toast = useToast();
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Separate useEffect for authentication
+  useEffect(() => {
+    const checkAuth = async () => {
+      const user = getCurrentUser();
+      const token = getAuthToken();
+      
+      if (!user || !token) {
+        router.push('/login');
+        return;
+      }
+
+      if (user.role !== 'system_admin' && user.role !== 'admin') {
+        router.push('/login');
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/verify', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          localStorage.removeItem('matgoToken');
+          localStorage.removeItem('matgoUser');
+          router.push('/login');
+          return;
+        }
+
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error('Auth verification failed:', error);
+        router.push('/login');
+      }
+    };
+
+    checkAuth();
+  }, [router]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const user = getCurrentUser();
+      const token = getAuthToken();
+      
+      if (!user || !token) {
+        router.push('/login');
+        return;
+      }
+
+      if (user.role !== 'system_admin' && user.role !== 'admin') {
+        router.push('/login');
+        return;
+      }
+
+      // Verify token with backend
+      const response = await fetch('http://localhost:5000/api/auth/verify', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        localStorage.removeItem('matgoToken');
+        localStorage.removeItem('matgoUser');
+        router.push('/login');
+      }
+    };
+    checkAuth();
+  }, [router]);
+  const [error, setError] = useState<string | null>(null);
 
   // Data states - should be populated from backend
   const [saccoCount, setSaccoCount] = useState(0);
@@ -45,31 +132,54 @@ export default function SystemAdminDashboard() {
   const [monthlyAnalytics, setMonthlyAnalytics] = useState<MonthlyAnalytics[]>([]);
 
   useEffect(() => {
+    let isComponentMounted = true;
+    let timer: NodeJS.Timeout;
+    
+    const handleApiError = (error: ApiError, context: string) => {
+      console.error(`Error in ${context}:`, error);
+      if (error.response?.status === 401) {
+        // Clear auth data
+        localStorage.removeItem('matgoToken');
+        localStorage.removeItem('matgoUser');
+        
+        // Use a timeout to prevent immediate redirect that might interrupt other operations
+        timer = setTimeout(() => {
+          if (isComponentMounted) {
+            router.push('/login');
+          }
+        }, 100);
+        return null;
+      }
+      return [];
+    };
+
     const fetchData = async () => {
-      // Check authentication
-      if (!requireAuth()) return;
-      
-      setIsLoading(true);
+      if (!isAuthenticated) return;
       
       try {
+        if (!isComponentMounted) return;
+        setIsLoading(true);
+        
+        const token = getAuthToken();
+        const headers = { 
+          Authorization: `Bearer ${token}`,
+          'Accept': 'application/json'
+        };
+        
         // Fetch all data in parallel with proper error handling
         const [stats, saccos, reports, bookings] = await Promise.all([
-          api.get<StatsResponse>('/stats').catch((error) => {
-            console.error('Error fetching stats:', error);
-            return { totalMatatus: 0, totalUsers: 0 };
-          }),
-          api.get<any[]>('/saccos').catch((error) => {
-            console.error('Error fetching saccos:', error);
-            return [];
-          }),
-          api.get<any[]>('/reports').catch((error) => {
-            console.error('Error fetching reports:', error);
-            return [];
-          }),
-          api.get<any[]>('/bookings').catch((error) => {
-            console.error('Error fetching bookings:', error);
-            return [];
-          })
+          api.get('/stats', { headers }).catch((error: ApiError) => 
+            handleApiError(error, 'stats') || { totalMatatus: 0, totalUsers: 0 }
+          ),
+          api.get('/saccos', { headers }).catch((error: ApiError) => 
+            handleApiError(error, 'saccos')
+          ),
+          api.get('/reports', { headers }).catch((error: ApiError) => 
+            handleApiError(error, 'reports')
+          ),
+          api.get('/bookings', { headers }).catch((error: ApiError) => 
+            handleApiError(error, 'bookings')
+          )
         ]);
         
         // Update state with fetched data
@@ -133,14 +243,18 @@ export default function SystemAdminDashboard() {
         
         setMonthlyAnalytics(analyticsData);
         
-      } catch (error) {
+      } catch (e) {
+        const error = e as ApiError;
         console.error('Error fetching dashboard data:', error);
-        // Show error toast to user
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to load dashboard data. Please try again later.",
-        });
+        if (error.response?.status === 401) {
+          // Clear auth data and redirect to login
+          localStorage.removeItem('matgoToken');
+          localStorage.removeItem('matgoUser');
+          router.push('/login');
+        } else {
+          // Set error state for display
+          setError('Failed to load dashboard data. Please try again later.');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -148,7 +262,14 @@ export default function SystemAdminDashboard() {
     
 
     fetchData();
-  }, []);
+
+    return () => {
+      isComponentMounted = false;
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [router, toast]);
 
   const content = {
     ENG: {
@@ -239,6 +360,13 @@ export default function SystemAdminDashboard() {
               ) : (
                 <div className="text-center py-10 text-muted-foreground">{currentContent.noData}</div>
               )}
+            </CardContent>
+          </Card>
+        )}
+        {error && (
+          <Card className="shadow-lg glassy-card bg-destructive text-destructive-foreground">
+            <CardContent className="p-4">
+              <p className="text-center">{error}</p>
             </CardContent>
           </Card>
         )}

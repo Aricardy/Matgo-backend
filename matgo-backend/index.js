@@ -1,12 +1,18 @@
-// ...existing imports...
+import scanCountsRoutes from './routes/scanCounts.js';
+// Scan count routes
+app.use('/api/scan-counts', scanCountsRoutes);
+// ...existing code...
+// ...existing code...
+import routePricesRoutes from './routes/routePrices.js';
+// Route prices (dynamic fare lookup)
+// (app.use is placed after app is initialized below)
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
-import { syncAll } from './models/index.js';
+import db from './config/db.js';
 
 dotenv.config();
-
-import sequelize from './config/db.js';
 
 import tripsRoutes from "./routes/trips.js";
 import matatusRoutes from "./routes/matatus.js";
@@ -30,17 +36,33 @@ import systemHealthRoutes from './routes/systemHealth.js';
 import usersRoutes from './routes/users.js';
 import routesRoutes from './routes/routes.js';
 import statsRoutes from './routes/statsRoutes.js';
+import paymentsRoutes from './routes/payments.js';
+import longDistanceRoutes from './routes/long-distance.js';
 
 const app = express();
-import vehiclesRoutes from './routes/vehicles.js';
-// Vehicles route
-app.use('/api/vehicles', vehiclesRoutes);
-app.use(cors({ origin: 'http://localhost:9002', credentials: true }));
+
+// Set up middleware first
+app.use(cors({
+  origin: [
+    'https://your-frontend.vercel.app', // TODO: Replace with your actual deployed frontend URL
+    'http://localhost:9002' // keep localhost for local dev
+  ],
+  credentials: true
+}));
 app.use(express.json());
+app.use(cookieParser());
+
+// Set up routes
+app.use('/api/route-prices', routePricesRoutes);
+app.use('/api/matatus', matatusRoutes);
+app.use('/api/long-distance', longDistanceRoutes);
 app.use('/uploads', express.static('uploads'));
 
 // Auth routes first
 app.use('/api/auth', authRoutes);
+
+// Payments route
+app.use('/api/payments', paymentsRoutes);
 
 // Admin routes
 app.use('/api/admin/approvals', approvalsRoutes);
@@ -81,6 +103,16 @@ app.use('/api/saccos', saccoAdminRoutes);
 // Reports routes (redirect to admin reports for compatibility)
 app.use('/api/reports', reportsRoutes);
 
+// Test database connection endpoint
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT NOW() AS currentTime');
+    res.json({ success: true, currentTime: rows[0].currentTime });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Add root route
 app.get('/', (req, res) => {
   res.json({ 
@@ -97,12 +129,15 @@ app.use('*', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Start the server only after database sync
+// Start the server after checking database connection
 const startServer = async () => {
   try {
-    console.log('🔍 Attempting to sync database...');
-    await syncAll(); // This will create/sync all tables
-    console.log('✅ Database synced successfully');
+    console.log('🔍 Checking database connection...');
+    // Test database connection
+    const [result] = await db.query('SELECT 1');
+    if (result) {
+      console.log('✅ Database connected successfully');
+    }
     
     const server = app.listen(PORT, '0.0.0.0', () => {
       const address = server.address();
@@ -120,7 +155,10 @@ const startServer = async () => {
       process.exit(1);
     });
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
+    console.error('❌ Failed to start server:', error.message);
+    if (error.code === 'ECONNREFUSED') {
+      console.error('❌ Could not connect to the database. Make sure your database is running and credentials are correct.');
+    }
     process.exit(1);
   }
 };

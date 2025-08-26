@@ -1,22 +1,4 @@
 // ...existing imports and code...
 // Only one Conductor model definition and one export default should exist in this file.
-import { DataTypes } from 'sequelize';
-import sequelize from '../config/db.js';
-
-const Conductor = sequelize.define('Conductor', {
-  id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-  fullName: { type: DataTypes.STRING, allowNull: false },
-  email: { type: DataTypes.STRING, unique: true, allowNull: false },
-  phone: { type: DataTypes.STRING, allowNull: false },
-  password: { type: DataTypes.STRING, allowNull: false },
-  nationalId: { type: DataTypes.STRING, allowNull: false },
-  sacco: { type: DataTypes.STRING, allowNull: false },
-  busIdentifier: { type: DataTypes.STRING, allowNull: false },
-  busType: { type: DataTypes.STRING, defaultValue: 'Matatu' },
-  avatar: { type: DataTypes.STRING },
-  busPic: { type: DataTypes.STRING },
-  nationalIdImage: { type: DataTypes.STRING },
-  approved: { type: DataTypes.BOOLEAN, defaultValue: true }
-});
-
-export default Conductor;
+// Sequelize model removed. Use plain MySQL or implement as needed.
+// If you need a Conductor model, use the Booking.js/User.js pattern.
