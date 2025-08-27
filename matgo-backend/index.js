@@ -1,7 +1,7 @@
 import scanCountsRoutes from './routes/scanCounts.js';
-// Scan count routes
-app.use('/api/scan-counts', scanCountsRoutes);
 // ...existing code...
+// Scan count routes (after app and middleware are set up)
+app.use('/api/scan-counts', scanCountsRoutes);
 // ...existing code...
 import routePricesRoutes from './routes/routePrices.js';
 // Route prices (dynamic fare lookup)
