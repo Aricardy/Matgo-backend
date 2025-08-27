@@ -44,8 +44,8 @@ const app = express();
 // Set up middleware first
 app.use(cors({
   origin: [
-    'https://your-frontend.vercel.app', // TODO: Replace with your actual deployed frontend URL
-    'http://localhost:9002' // keep localhost for local dev
+    'https://matgo-2-0-kfui.vercel.app', // production frontend
+    'http://localhost:9002' // local dev
   ],
   credentials: true
 }));

@@ -1,6 +1,6 @@
 import express from 'express';
 import { incrementBusScanCount, getBusScanCount } from '../models/BusScanCount.js';
-import { authenticateToken } from '../middleware/auth.js';
+import authenticateToken from '../middleware/auth.js';
 
 const router = express.Router();
 
